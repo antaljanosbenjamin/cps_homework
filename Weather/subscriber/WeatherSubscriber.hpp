@@ -9,7 +9,7 @@
 #include <dds/dds.hpp>
 #include "Weather.hpp"
 
-class WeatherSubscriber : public dds::sub::DataReaderListener<Weather> {
+class WeatherSubscriber : public dds::sub::NoOpDataReaderListener<Weather> {
 public:
 
     WeatherSubscriber(
@@ -17,23 +17,6 @@ public:
             const std::string &topic_name);
 
     ~WeatherSubscriber();
-
-    void on_requested_deadline_missed(dds::sub::DataReader<Weather> &,
-                                      const dds::core::status::RequestedDeadlineMissedStatus &) override;
-
-    void on_requested_incompatible_qos(dds::sub::DataReader<Weather> &,
-                                       const dds::core::status::RequestedIncompatibleQosStatus &) override;
-
-    void on_sample_rejected(dds::sub::DataReader<Weather> &, const dds::core::status::SampleRejectedStatus &) override;
-
-    void
-    on_liveliness_changed(dds::sub::DataReader<Weather> &, const dds::core::status::LivelinessChangedStatus &) override;
-
-    void
-    on_sample_lost(dds::sub::DataReader<Weather> &, const dds::core::status::SampleLostStatus &) override;
-
-    void on_subscription_matched(dds::sub::DataReader<Weather> &,
-                                 const dds::core::status::SubscriptionMatchedStatus &) override;
 
     void on_data_available(dds::sub::DataReader<Weather> &reader) override;
 

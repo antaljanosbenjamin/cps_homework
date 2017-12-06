@@ -28,45 +28,6 @@ WeatherSubscriber::WeatherSubscriber(int domain_id, const std::string &topic_nam
     reader.listener(this, StatusMask::all());
 }
 
-
-void WeatherSubscriber::on_requested_deadline_missed(
-        DataReader<Weather> &,
-        const RequestedDeadlineMissedStatus &) {
-    std::cout << "->Callback: requested deadline missed." << std::endl;
-}
-
-void WeatherSubscriber::on_requested_incompatible_qos(
-        DataReader<Weather> &,
-        const RequestedIncompatibleQosStatus &) {
-    std::cout << "->Callback: requested incompatible QoS." << std::endl;
-}
-
-void WeatherSubscriber::on_sample_rejected(
-        DataReader<Weather> &,
-        const SampleRejectedStatus &) {
-    std::cout << "->Callback: sample rejected." << std::endl;
-}
-
-void WeatherSubscriber::on_liveliness_changed(
-        DataReader<Weather> & reader,
-        const LivelinessChangedStatus &) {
-    std::cout << "->Callback: liveliness changed." << std::endl;
-    on_data_available(reader);
-}
-
-void WeatherSubscriber::on_sample_lost(
-        DataReader<Weather> &,
-        const SampleLostStatus &) {
-    lost_samples++;
-    std::cout << "->Callback: sample lost." << std::endl;
-}
-
-void WeatherSubscriber::on_subscription_matched(
-        DataReader<Weather> &,
-        const SubscriptionMatchedStatus &) {
-    std::cout << "->Callback: subscription matched" << std::endl;
-}
-
 void WeatherSubscriber::on_data_available(DataReader<Weather> &reader) {
     LoanedSamples<Weather> samples = reader.take();
     for (LoanedSamples<Weather>::iterator it = samples.begin(); it != samples.end(); it++) {
