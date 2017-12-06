@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 #include <dds/dds.hpp>
-#include "WeatherPublisher.hpp"
+#include "Weather/publisher/WeatherPublisher.hpp"
 
 using namespace dds::core;
 using namespace dds::domain;

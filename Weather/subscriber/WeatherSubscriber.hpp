@@ -7,7 +7,7 @@
 
 #include <string>
 #include <dds/dds.hpp>
-#include "Weather.hpp"
+#include "Weather/common/Weather.hpp"
 
 class WeatherSubscriber : public dds::sub::NoOpDataReaderListener<Weather> {
 public:

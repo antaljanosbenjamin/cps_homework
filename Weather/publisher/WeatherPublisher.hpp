@@ -10,7 +10,7 @@
 
 #include <string>
 #include <dds/dds.hpp>
-#include "Weather.hpp"
+#include "Weather/common/Weather.hpp"
 
 class WeatherPublisher {
 public:

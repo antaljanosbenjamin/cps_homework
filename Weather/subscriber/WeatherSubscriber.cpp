@@ -13,7 +13,7 @@
 #include <iostream>
 #include <string>
 #include <dds/dds.hpp>
-#include "WeatherSubscriber.hpp"
+#include "Weather/subscriber/WeatherSubscriber.hpp"
 
 using namespace dds::core;
 using namespace dds::core::status;
