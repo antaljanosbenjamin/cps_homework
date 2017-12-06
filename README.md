@@ -12,7 +12,7 @@ cmake .
 cmake --build .
 ```
 
-After that, the subscriber can be started with `bin/cps_main s` and the publisher with `bin/cps_main p`. 
+After that, copy the license file to `bin`. Once the license has been copied, the subscriber can be started with `bin/cps_main s` and the publisher with `bin/cps_main p`. 
 
 Good luck, have fun!
 
