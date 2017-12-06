@@ -1,0 +1,4 @@
+struct Weather {
+    double  temperature;
+    long    pollution;
+};
