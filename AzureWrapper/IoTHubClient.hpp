@@ -45,8 +45,6 @@ private:
 
     void removeFromNotConfirmedIntances(EventInstance *eventInstance);
 
-protected:
-
     const std::string connectionString;
     std::function<void(const rapidjson::Document &)> receivedMessageConsumer;
     bool trace;
@@ -58,6 +56,7 @@ protected:
     std::atomic_bool canRun;
     std::thread workerThread;
     std::set<EventInstance *> notConfirmedIntances;
+    std::atomic_size_t nextTrackingId;
 
     void receive(const rapidjson::Document &message);
 

@@ -84,7 +84,8 @@ IoTHubClient::IoTHubClient(const std::string &connectionString,
           ownMutex(),
           canRun(true),
           workerThread(),
-          notConfirmedIntances() {
+          notConfirmedIntances(),
+          nextTrackingId(0) {
 
 
     std::lock_guard<std::mutex> globalLock(globalMutex);
@@ -253,7 +254,7 @@ void IoTHubClient::sendMessage(const rapidjson::Document &message) {
             (const unsigned char *) messageStr.c_str(), messageStr.size())) == NULL) {
         BOOST_LOG_TRIVIAL(error) << "iotHubMessageHandle is NULL!";
     } else {
-        eventInstance->messageTrackingId = 5;
+        eventInstance->messageTrackingId = this->nextTrackingId++;
 
         MAP_HANDLE propMap = IHM(Properties)(eventInstance->messageHandle);
         std::stringstream propStream;
