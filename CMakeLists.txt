@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.5.1)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-set (CMAKE_CXX_FLAGS "--std=c++14 ${CMAKE_CXX_FLAGS} -DRTI_UNIX -DRTI_LINUX -DRTI_64BIT -DRTI_STATIC -DBOOST_LOG_DYN_LINK")
+set (CMAKE_CXX_FLAGS "--std=c++14 ${CMAKE_CXX_FLAGS} -DRTI_UNIX -DRTI_LINUX -DRTI_64BIT -DRTI_STATIC -DBOOST_LOG_DYN_LINK -Wall")
 
 set(DDSHOME "/home/kovi/bin/rti_connext_dds-5.3.0/")
 set(TARGET_ARCH "x64Linux3gcc5.4.0")
 
-include_directories(${DDSHOME}/include ${DDSHOME}/include/ndds ${DDSHOME}/include/ndds/hpp)
+include_directories(SYSTEM ${DDSHOME}/include ${DDSHOME}/include/ndds ${DDSHOME}/include/ndds/hpp)
 
 link_directories(${DDSHOME}lib/${TARGET_ARCH})
 
@@ -42,7 +42,7 @@ set(AZURE_WRAPPER_ALL ${AZURE_WRAPPER_SOURCES} ${AZURE_WRAPPER_HEADERS})
 
 find_package(Boost REQUIRED COMPONENTS date_time log log_setup )
 
-include_directories(${AZUREIOT_INC_FOLDER} ${RAPIDJSON_INC_FOLDER} ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${AZUREIOT_INC_FOLDER} ${RAPIDJSON_INC_FOLDER} ${Boost_INCLUDE_DIRS})
 
 # Final target
 add_executable(cps_main ${WEATHER_ALL} ${AZURE_WRAPPER_ALL} main.cpp)

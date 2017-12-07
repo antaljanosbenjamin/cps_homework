@@ -22,12 +22,13 @@ typedef struct EventInstance {
     size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EventInstance;
 
-class IoTHubClient {
+class IoTHubClient final {
 private:
 
     static std::mutex globalMutex;
     static std::map<EventInstance *, IoTHubClient *> eventInstanceMapping;
     static std::set<IoTHubClient *> livingClients;
+    static bool initialized;
 
     static IOTHUBMESSAGE_DISPOSITION_RESULT
     receiveMessage(IOTHUB_MESSAGE_HANDLE message, void *userContextCallback);
@@ -47,30 +48,38 @@ private:
 protected:
 
     const std::string connectionString;
+    std::function<void(const rapidjson::Document &)> receivedMessageConsumer;
     bool trace;
     uint32_t keepAlive;
 
-
     IOTHUB_CLIENT_LL_HANDLE clientHandle;
-    bool initialized;
 
     std::mutex ownMutex;
     std::atomic_bool canRun;
-    std::condition_variable conditionVariable;
     std::thread workerThread;
     std::set<EventInstance *> notConfirmedIntances;
 
-public:
+    void receive(const rapidjson::Document &message);
+
+
     static void init();
+
+    static void initWithoutLock();
 
     static void finalize();
 
-    IoTHubClient(const std::string &connectionString, bool trace, uint32_t keepAlive);
+    static void finalizeWithoutLock();
 
-    virtual ~IoTHubClient();
 
-    virtual void sendMessage(const rapidjson::Document &message);
+public:
 
+    IoTHubClient(const std::string &connectionString,
+                 std::function<void(const rapidjson::Document &)> receivedMessageConsumer, bool trace = false,
+                 uint32_t keepAlive = 240);
+
+    ~IoTHubClient();
+
+    void sendMessage(const rapidjson::Document &message);
 };
 
 #endif //PROJECT_IOTHUBCLIENT_HPP

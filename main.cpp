@@ -34,15 +34,8 @@ Document getMessage() {
     return message;
 }
 
-#if __x86_64__ || __ppc64__
-#define ENVIRONMENTAA "x64"
-#else
-#define ENVIRONMENTAA "x32"
-#endif
-
 int main(int argc, const char **argv) {
 
-    std::cout << ENVIRONMENTAA;
     if (argc < 2) {
         return -1;
     }
@@ -56,9 +49,11 @@ int main(int argc, const char **argv) {
         sub.startReceiving();
         dds::domain::DomainParticipant::finalize_participant_factory();
     } else if (argv[1][0] == 'a') {
-        IoTHubClient::init();
-        IoTHubClient client(connectionString, false, 350);
+        std::function<void(const rapidjson::Document&)> consumer = [](const rapidjson::Document&){
+            std::cout << "I got it..." << std::endl;
+        };
+        IoTHubClient client (connectionString, consumer, true, 350);
+        std::this_thread::sleep_for(30s);
         client.sendMessage(getMessage());
-        std::this_thread::sleep_for(5min);
     }
 }

@@ -19,7 +19,6 @@
 #include "iothub_message.h"
 #include "iothubtransportamqp.h"
 
-
 #include <rapidjson/prettywriter.h> // for stringify JSON
 
 #include "AzureWrapper/IoTHubClient.hpp"
@@ -36,33 +35,60 @@ using namespace boost::posix_time;
 std::mutex IoTHubClient::globalMutex;
 std::map<EventInstance *, IoTHubClient *> IoTHubClient::eventInstanceMapping;
 std::set<IoTHubClient *> IoTHubClient::livingClients;
+bool IoTHubClient::initialized = false;
 
-void IoTHubClient::init(){
+void IoTHubClient::init() {
+    std::lock_guard<std::mutex> globalLock(globalMutex);
+    initWithoutLock();
+}
+
+void IoTHubClient::initWithoutLock() {
+    if (initialized) {
+        BOOST_LOG_TRIVIAL(debug) << "Already initialized....";
+        return;
+    }
     BOOST_LOG_TRIVIAL(debug) << "Init....";
     if (platform_init()) {
         BOOST_LOG_TRIVIAL(error) << "Failed to initialize the platform!";
         throw std::runtime_error("Failed to initialize the platform!");
     }
+    initialized = true;
 }
 
-void IoTHubClient::finalize(){
+void IoTHubClient::finalize() {
+    std::lock_guard<std::mutex> globalLock(globalMutex);
+    finalizeWithoutLock();
+}
+
+void IoTHubClient::finalizeWithoutLock() {
+    if (!initialized) {
+        BOOST_LOG_TRIVIAL(debug) << "Already finalized....";
+        return;
+    }
+    if (livingClients.size() != 0) {
+        BOOST_LOG_TRIVIAL(error) << "There are living clients....";
+    }
+    BOOST_LOG_TRIVIAL(debug) << "Finalize...";
     platform_deinit();
+    initialized = false;
 }
 
-
-IoTHubClient::IoTHubClient(const std::string &connectionString, bool trace, uint32_t keepAlive)
+IoTHubClient::IoTHubClient(const std::string &connectionString,
+                           std::function<void(const rapidjson::Document &)> receivedMessageConsumer, bool trace,
+                           uint32_t keepAlive)
         : connectionString(connectionString),
+          receivedMessageConsumer(receivedMessageConsumer),
           trace(trace),
           keepAlive(keepAlive),
           clientHandle(nullptr),
-          initialized(false),
           ownMutex(),
           canRun(true),
-          conditionVariable(),
           workerThread(),
           notConfirmedIntances() {
 
 
+    std::lock_guard<std::mutex> globalLock(globalMutex);
+    initWithoutLock();
 
     this->clientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString.c_str(), AMQP_Protocol);
     if (this->clientHandle != nullptr) {
@@ -78,7 +104,6 @@ IoTHubClient::IoTHubClient(const std::string &connectionString, bool trace, uint
 
         BOOST_LOG_TRIVIAL(debug) << "Init successful!";
 
-        std::lock_guard<std::mutex> globalLock(globalMutex);
         livingClients.insert(this);
     } else {
         BOOST_LOG_TRIVIAL(error) << "IoTHubClient_LL_CreateFromConnectionString..........FAILED!";
@@ -90,17 +115,18 @@ IoTHubClient::~IoTHubClient() {
     this->canRun.store(false);
     this->workerThread.join();
 
-    {
-        std::lock_guard<std::mutex> globalLock(globalMutex);
+    std::lock_guard<std::mutex> globalLock(globalMutex);
 
-        std::for_each(notConfirmedIntances.begin(), notConfirmedIntances.end(),
-                      [&](EventInstance *eventInstance) {
-                          eventInstanceMapping.erase(eventInstance);
-                      });
-        livingClients.erase(this);
-    }
+    std::for_each(notConfirmedIntances.begin(), notConfirmedIntances.end(),
+                  [&](EventInstance *eventInstance) { eventInstanceMapping.erase(eventInstance); });
+
+    livingClients.erase(this);
 
     IoTHubClient_LL_Destroy(this->clientHandle);
+
+    if (livingClients.size() == 0) {
+        finalizeWithoutLock();
+    }
 }
 
 IOTHUBMESSAGE_DISPOSITION_RESULT
@@ -114,11 +140,26 @@ IoTHubClient::receiveMessage(IOTHUB_MESSAGE_HANDLE message, void *userContextCal
 
     if (contentType == IOTHUBMESSAGE_BYTEARRAY) {
         if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK) {
-            std::string messageStr(buffer, buffer+size);
+            std::string messageStr(buffer, buffer + size);
             BOOST_LOG_TRIVIAL(debug) << "Message received: " << messageStr << ".";
 
+            rapidjson::Document message;
+            if (message.Parse(messageStr.c_str()).HasParseError()) {
+                BOOST_LOG_TRIVIAL(error) << "Error during parsing message: " << messageStr << ".";
+                return IOTHUBMESSAGE_ACCEPTED;
+            }
+            {
+                std::lock_guard<std::mutex> globalLock(globalMutex);
+                if (livingClients.find(client) == livingClients.end()) {
+                    BOOST_LOG_TRIVIAL(error) << "Can't find client!";
+                    return IOTHUBMESSAGE_REJECTED;
+                }
+                client->receive(message);
+            }
+
         } else {
-            (void) printf("Failed getting the BINARY body of the message received.\r\n");
+            BOOST_LOG_TRIVIAL(error) << "Failed getting the BINARY body of the message received.";
+            return IOTHUBMESSAGE_ACCEPTED;
         }
     } else if (contentType == IOTHUBMESSAGE_STRING) {
         // TODO
@@ -136,8 +177,16 @@ void IoTHubClient::confirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
     BOOST_LOG_TRIVIAL(debug) << "Message confirmation received for message " << eventInstance->messageTrackingId
                              << "! Status is " << ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
 
-    // TODO remove from messages and call member function
-
+    {
+        std::lock_guard<std::mutex> globalLock(globalMutex);
+        auto it = eventInstanceMapping.find(eventInstance);
+        if (it == eventInstanceMapping.end()) {
+            BOOST_LOG_TRIVIAL(error) << "Can't find client!";
+            return;
+        }
+        it->second->removeFromNotConfirmedIntances(eventInstance);
+        BOOST_LOG_TRIVIAL(debug) << "Message " << eventInstance->messageTrackingId << " is removed.";
+    }
 
     IoTHubMessage_Destroy(eventInstance->messageHandle);
     delete eventInstance;
@@ -145,7 +194,6 @@ void IoTHubClient::confirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
 
 
 void IoTHubClient::doWork() {
-    IOTHUB_CLIENT_STATUS status;
 
     while (canRun.load()) {
         BOOST_LOG_TRIVIAL(debug) << "Do some work....";
@@ -153,15 +201,23 @@ void IoTHubClient::doWork() {
         std::this_thread::sleep_for(1s);
     }
 
-    // best effort to send all message
-    for (int i = 0; i < notConfirmedIntances.size() * 2; i++) {
-        IHC(DoWork)(this->clientHandle);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
+    size_t notConfirmedInstanceCount;
     {
-        std::unique_lock<std::mutex> lock(ownMutex);
-        this->conditionVariable.wait_for(lock, 5s, [&]() { return notConfirmedIntances.size() == 0; });
+        std::lock_guard<std::mutex> ownLock(this->ownMutex);
+        notConfirmedInstanceCount = notConfirmedIntances.size();
+    }
+    size_t remainingConfirmation = notConfirmedInstanceCount;
+    size_t trialCount = 0;
+    BOOST_LOG_TRIVIAL(debug) << "Stopping....";
+    // best effort to send all message
+    while (trialCount < notConfirmedInstanceCount * 10 && remainingConfirmation > 0) {
+        BOOST_LOG_TRIVIAL(debug) << "Do some more work...." << remainingConfirmation;
+        IHC(DoWork)(this->clientHandle);
+        {
+            std::lock_guard<std::mutex> ownLock(this->ownMutex);
+            remainingConfirmation = notConfirmedIntances.size();
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
@@ -176,13 +232,13 @@ void IoTHubClient::removeFromEventInstanceMapping(EventInstance *eventInstance) 
 }
 
 void IoTHubClient::addToNotConfirmedIntances(EventInstance *eventInstance) {
-    std::lock_guard<std::mutex> globalLock(this->ownMutex);
+    std::lock_guard<std::mutex> ownLock(this->ownMutex);
     notConfirmedIntances.insert(eventInstance);
 }
 
 void IoTHubClient::removeFromNotConfirmedIntances(EventInstance *eventInstance) {
-    std::lock_guard<std::mutex> globalLock(this->ownMutex);
-    eventInstanceMapping.erase(eventInstance);
+    std::lock_guard<std::mutex> ownLock(this->ownMutex);
+    notConfirmedIntances.erase(eventInstance);
 }
 
 void IoTHubClient::sendMessage(const rapidjson::Document &message) {
@@ -192,7 +248,7 @@ void IoTHubClient::sendMessage(const rapidjson::Document &message) {
     message.Accept(writer);
 
     std::string messageStr = buffer.GetString();
-    EventInstance *eventInstance = new EventInstance{};
+    auto *eventInstance = new EventInstance{};
     if ((eventInstance->messageHandle = IoTHubMessage_CreateFromByteArray(
             (const unsigned char *) messageStr.c_str(), messageStr.size())) == NULL) {
         BOOST_LOG_TRIVIAL(error) << "iotHubMessageHandle is NULL!";
@@ -217,14 +273,19 @@ void IoTHubClient::sendMessage(const rapidjson::Document &message) {
         this->addToEventInstanceMapping(eventInstance);
         if (IHC(SendEventAsync)(this->clientHandle, eventInstance->messageHandle, confirmationCallback,
                                 eventInstance) != IOTHUB_CLIENT_OK) {
-            BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SendEventAsync..........FAILED!";
             this->addToNotConfirmedIntances(eventInstance);
+            BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SendEventAsync..........FAILED!";
+            this->removeFromEventInstanceMapping(eventInstance);
         } else {
             BOOST_LOG_TRIVIAL(debug)
                 << "IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub. Message is: " << messageStr
                 << ", tracking id is "
                 << eventInstance->messageTrackingId << ".";
-            this->removeFromEventInstanceMapping(eventInstance);
+            this->addToNotConfirmedIntances(eventInstance);
         }
     }
+}
+
+void IoTHubClient::receive(const rapidjson::Document &message) {
+    receivedMessageConsumer(message);
 }
