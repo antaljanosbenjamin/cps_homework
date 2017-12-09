@@ -7,7 +7,7 @@ Prerequisites:
 To build you have to execute the following commands from the root directory of the repo:
 ```
 mkdir Weather/common
-${NDDSHOME}/bin/rtiddsgen  -language C++11 -stl -ppDisable -d Weather/common -replace idl_files/Weather.idl
+${NDDSHOME}/bin/rtiddsgen  -language C++11 -stl -ppDisable -d DDS/Weather/common -replace idl_files/Weather.idl
 cmake .
 cmake --build .
 ```

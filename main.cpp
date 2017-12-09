@@ -5,30 +5,34 @@
 #include <thread>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian/greg_year.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <fstream>
 
-#include "Weather/publisher/WeatherPublisher.hpp"
-#include "Weather/subscriber/WeatherSubscriber.hpp"
+#include "DDS/Weather/publisher/WeatherPublisher.hpp"
+#include "DDS/Weather/subscriber/WeatherSubscriber.hpp"
 #include "AzureWrapper/IoTHubClient.hpp"
+#include "Util/WeatherInformationService.hpp"
 
 using namespace rapidjson;
 using namespace boost::posix_time;
 using namespace std::chrono_literals;
 
-std::string connectionString("Copy here the connection string from Azure");
+std::string connectionString(
+        "HostName=CPSHumidity.azure-devices.net;DeviceId=TrialDevice;SharedAccessKey=wlWbR3Md6fB+9f2i9+II+Y3tuI1HNle5Lnp2lGOIxVo=");
 
-Document getMessage() {
+Document getMessage(boost::posix_time::ptime time, double humidityValue) {
 
-    double avgWindSpeed = 60.0;
-    std::string timestamp = to_iso_extended_string(second_clock::local_time());
+    std::string timestamp = to_iso_extended_string(time);
 
     Document message;
     message.SetObject();
     auto &allocator = message.GetAllocator();
     message.AddMember("deviceId", Value("myFirstDevice", allocator), allocator);
-    message.AddMember("windSpeed", Value(avgWindSpeed + (rand() % 15 + 2)), allocator);
+    message.AddMember("humidityValue", Value(humidityValue), allocator);
+    message.AddMember("led", Value(humidityValue > 77 ? 1 : 0), allocator);
     message.AddMember("timestamp", Value(timestamp.c_str(), allocator), allocator);
 
     return message;
@@ -45,15 +49,30 @@ int main(int argc, const char **argv) {
         pub.publish(50);
         dds::domain::DomainParticipant::finalize_participant_factory();
     } else if (argv[1][0] == 's') {
-        WeatherSubscriber sub(0, "weather");
+        WeatherSubscriber sub(0, "weather", 1);
         sub.startReceiving();
         dds::domain::DomainParticipant::finalize_participant_factory();
     } else if (argv[1][0] == 'a') {
-        std::function<void(const rapidjson::Document&)> consumer = [](const rapidjson::Document&){
+        std::function<void(const rapidjson::Document &)> consumer = [](const rapidjson::Document &) {
             std::cout << "I got it..." << std::endl;
         };
-        IoTHubClient client (connectionString, consumer, true, 350);
-        std::this_thread::sleep_for(30s);
-        client.sendMessage(getMessage());
+        IoTHubClient client(connectionString, consumer, false, 350);
+        std::ifstream myfile;
+        double value;
+        auto timestamp = second_clock::local_time() - hours(200);
+        myfile.open("/home/kovi/tmp/input.csv", std::ios::in);
+        myfile >> value;
+        client.sendMessage(getMessage(timestamp, value));
+        std::this_thread::sleep_for(45s);
+        while (myfile >> value) {
+            timestamp += minutes(10);
+            client.sendMessage(getMessage(timestamp, value));
+            std::this_thread::sleep_for(10ms);
+        }
+        std::this_thread::sleep_for(100s);
+    } else if (argv[1][0] == 'w'){
+        WeatherInformationService service("dRyBT26mgdNhShwg9");
+        std::cout << service.getWeatherInfoAsString(47.4985f, 19.0527f, 4);
+        std::cout << service.getWeatherInfo(47.4985f, 19.0527f, 4).pollutionTimestamp;
     }
 }

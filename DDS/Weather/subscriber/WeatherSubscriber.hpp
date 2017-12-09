@@ -7,14 +7,14 @@
 
 #include <string>
 #include <dds/dds.hpp>
-#include "Weather/common/Weather.hpp"
+#include <atomic>
+
+#include "DDS/Weather/common/Weather.hpp"
 
 class WeatherSubscriber : public dds::sub::NoOpDataReaderListener<Weather> {
 public:
 
-    WeatherSubscriber(
-            int domain_id,
-            const std::string &topic_name);
+    WeatherSubscriber(int domain_id, const std::string &topic_name, int pollSeconds);
 
     ~WeatherSubscriber();
 
@@ -25,18 +25,11 @@ public:
     void stopReceiving();
 
 private:
-    static const int PollSeconds = 1;
-
     dds::domain::DomainParticipant participant;
     dds::topic::Topic<Weather> topic;
     dds::sub::DataReader<Weather> reader;
 
-    int max_samples;
-    int payload_size;
-    int first_sample_id;
-    int last_sample_id;
-    int received_samples;
-    int lost_samples;
+    std::atomic<int> pollSeconds;
 };
 
 #endif //PROJECT_WEATHERSUBSCRIBER_HPP
