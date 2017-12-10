@@ -14,8 +14,6 @@ public:
     WeatherSubscriber();
 
     ~WeatherSubscriber() override;
-
-    void receiveData( const Weather & data);
 };
 
 #endif //PROJECT_WEATHERSUBSCRIBER_HPP

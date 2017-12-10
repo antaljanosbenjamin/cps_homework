@@ -28,16 +28,13 @@ public:
     void on_data_available(dds::sub::DataReader<DataT> &reader) override {
         dds::sub::LoanedSamples<DataT> samples = reader.take();
         for (typename dds::sub::LoanedSamples<DataT>::iterator it = samples.begin(); it != samples.end(); it++) {
-            std::cout << "Data received!" << std::endl;
             if (it->info().valid()) {
-                std::cout << "Data received!";
+                consumerFunction(it->data());
             }
         }
     }
 
-    virtual void receiveData(const DataT &data) = 0;
-
-    void startReceiving() {
+    void startReceiving(std::function<void(const DataT& data)> consumerFunction) {
         while (true) {
             rti::util::sleep(dds::core::Duration::from_secs(pollSeconds.load()));
         }
@@ -51,7 +48,7 @@ private:
     dds::domain::DomainParticipant participant;
     dds::topic::Topic<DataT> topic;
     dds::sub::DataReader<DataT> reader;
-
+    std::function<void(const DataT& data)> consumerFunction;
     std::atomic<int> pollSeconds;
 };
 

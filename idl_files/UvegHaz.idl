@@ -1,0 +1,5 @@
+struct UvegHaz{
+	string ID; //@key
+	double Value;
+	long TimeStamp;
+};

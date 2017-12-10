@@ -10,11 +10,5 @@ ScheduleSubscriber::ScheduleSubscriber()
 
 }
 
-void ScheduleSubscriber::receiveData(const Schedule &data) {
-
-    std::cout << "Data received! The schedule is " << data.scheduled() << std::endl;
-
-}
-
 ScheduleSubscriber::~ScheduleSubscriber() {
 }

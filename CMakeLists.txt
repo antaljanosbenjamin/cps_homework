@@ -37,7 +37,7 @@ set(SCHEDULE_COMMON_HEADERS DDS/Schedule/common/Schedule.hpp DDS/Schedule/common
 set(SCHEDULE_PUB_SOURCES ${DDS_SOURCES} DDS/Schedule/publisher/SchedulePublisher.cpp)
 set(SCHEDULE_PUB_HEADERS DDS/Schedule/publisher/SchedulePublisher.hpp)
 
-set(SCHEDULE_SUB_SOURCES DDS/Schedule/subscriber/ScheduleSubscriber.cpp)
+set(SCHEDULE_SUB_SOURCES DDS/Schedule/subscriber/DecisionSubscriber.cpp)
 set(SCHEDULE_SUB_HEADERS DDS/Schedule/subscriber/ScheduleSubscriber.hpp)
 
 set(SCHEDULE_ALL_SOURCES ${SCHEDULE_COMMON_SOURCES}
@@ -58,6 +58,20 @@ set(CONFIG_ALL_SOURCES ${CONFIG_COMMON_SOURCES}
         ${CONFIG_PUB_SOURCES}
         ${CONFIG_SUB_SOURCES})
 
+# DECISION
+set(DECISION_COMMON_SOURCES DDS/Decision/common/Decision.cxx DDS/Decision/common/DecisionPlugin.cxx)
+set(DECISION_COMMON_HEADERS DDS/Decision/common/Decision.hpp DDS/Decision/common/DecisionPlugin.hpp)
+
+set(DECISION_PUB_SOURCES ${DDS_SOURCES} DDS/Decision/publisher/DecisionPublisher.cpp)
+set(DECISION_PUB_HEADERS DDS/Decision/publisher/SchedulePublisher.hpp)
+
+set(DECISION_SUB_SOURCES DDS/Decision/subscriber/DecisionSubscriber.cpp)
+set(DECISION_SUB_HEADERS DDS/Decision/subscriber/DecisionSubscriber.hpp)
+
+set(DECISION_ALL_SOURCES ${DECISION_COMMON_SOURCES}
+        ${DECISION_PUB_SOURCES}
+        ${DECISION_SUB_SOURCES})
+
 # AzureWrapper
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 set(RAPIDJSON_INC_FOLDER "/home/kovi/Repos/rapidjson/include")
@@ -69,7 +83,7 @@ set(AZURE_WRAPPER_ALL_SOURCES ${AZURE_WRAPPER_SOURCES})
 
 find_package(Boost REQUIRED COMPONENTS date_time log log_setup)
 
-include_directories(SYSTEM ${AZUREIOT_INC_FOLDER} ${RAPIDJSON_INC_FOLDER} ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${AZUREIOT_INC_FOLDER} ${RAPIDJSON_INC_FOLDER})
 
 # CURLPP https://github.com/jpbarrette/curlpp
 # after install run cp /usr/local/lib/libcurlpp.* /usr/lib/
@@ -84,7 +98,8 @@ set(EDGE_SOURCES "Devices/HumidityEdge.cpp")
 
 # Final target
 include_directories(".")
-add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} main.cpp)
+add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} 
+        ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} ${DECISION_ALL_SOURCES} main.cpp)
 target_link_libraries(cps_main
         nddscpp2z
         nddscz

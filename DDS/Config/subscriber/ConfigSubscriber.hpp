@@ -14,8 +14,6 @@ public:
     ConfigSubscriber();
 
     ~ConfigSubscriber() override;
-
-    void receiveData( const Config & data);
 };
 
 

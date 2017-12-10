@@ -14,8 +14,6 @@ public:
     ScheduleSubscriber();
 
     ~ScheduleSubscriber() override;
-
-    void receiveData( const Schedule & data);
 };
 
 

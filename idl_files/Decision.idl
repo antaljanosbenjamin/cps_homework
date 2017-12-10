@@ -1,0 +1,13 @@
+#include <Weather.idl>
+#include <Config.idl>
+#include <Schedule.idl>
+
+enum Decision { OPEN, CLOSE };
+
+struct DecisionInfo {
+    unsigned long decisionTS;
+    Decision decision;
+    Config config;
+    Weather lastWeather;
+    Schedule lastSchedule;
+};

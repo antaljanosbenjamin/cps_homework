@@ -18,12 +18,5 @@ WeatherSubscriber::WeatherSubscriber()
 
 }
 
-void WeatherSubscriber::receiveData(const Weather &data) {
-
-    std::cout << "Data received! The temperature is " << data.temperature() << " and the pollution is "
-              << data.pollution() << std::endl;
-
-}
-
 WeatherSubscriber::~WeatherSubscriber() {
 }

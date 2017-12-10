@@ -10,11 +10,5 @@ ConfigSubscriber::ConfigSubscriber()
 
 }
 
-void ConfigSubscriber::receiveData(const Config &data) {
-
-    std::cout << "Data received! The maxtemp is " << data.maxTemperature() << std::endl;
-
-}
-
 ConfigSubscriber::~ConfigSubscriber() {
 }

@@ -5,7 +5,6 @@
 #include <thread>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/gregorian/greg_year.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -50,17 +49,17 @@ int main(int argc, const char **argv) {
     if (argv[1][0] == 'e') {
         HumidityEdge edge(weatherAPIKey, connectionString, "");
         edge.start();
-        std::this_thread::sleep_for(15s);
+        std::this_thread::sleep_for(65s);
         edge.stop();
         std::cout << "stopped!" << std::endl;
         edge.start();
-        std::this_thread::sleep_for(15s);
+        std::this_thread::sleep_for(65s);
         edge.stop();
         std::cout << "stopped!" << std::endl;
 
     } else if (argv[1][0] == 's') {
         WeatherSubscriber sub;
-        sub.startReceiving();
+        //sub.startReceiving();
         dds::domain::DomainParticipant::finalize_participant_factory();
     } else if (argv[1][0] == 'a') {
         std::function<void(const rapidjson::Document &)> consumer = [](const rapidjson::Document &) {

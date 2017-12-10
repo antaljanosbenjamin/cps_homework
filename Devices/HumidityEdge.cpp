@@ -7,6 +7,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <fstream>
 
+#include "Util/DateHelper.hpp"
 #include "HumidityEdge.hpp"
 
 using namespace rapidjson;
@@ -22,6 +23,7 @@ HumidityEdge::HumidityEdge(const std::string &weatherApiKey, const std::string &
         weatherPublisher(new WeatherPublisher()),
         schedulePublisher(new SchedulePublisher()),
         configPublisher(new ConfigPublisher()),
+        decisionSubscriber(new DecisionSubscriber()),
         iotClient(new IoTHubClient(azureConnectionString,
                                    [&](const Document &message) { this->receiveMessageFromCloud(message); })),
         isRunning(false) {
@@ -85,38 +87,64 @@ void HumidityEdge::start() {
 
     this->workerThread = std::thread([this]() {
         while (this->isRunning.load()) {
-            WeatherInformationService::WeatherInfo weatherInfo = this->weatherService->getWeatherInfo(47.4985f,
-                                                                                                      19.0527f, 4);
-            static boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
-            this->weatherPublisher->publish(weatherInfo.temperature,
-                                            (weatherInfo.temperatureTimestamp - epoch).total_seconds(),
-                                            weatherInfo.pollution,
-                                            (weatherInfo.pollutionTimestamp - epoch).total_seconds());
 
-            this->iotClient->sendMessage(this->getJSON(weatherInfo));
+            try {
+
+                WeatherInformationService::WeatherInfo weatherInfo = this->weatherService->getWeatherInfo(47.4985f,
+                                                                                                          19.0527f, 4);
+                this->weatherPublisher->publish(weatherInfo.temperature,
+                                                DateHelper::toUnixTimestamp(weatherInfo.temperatureTimestamp),
+                                                weatherInfo.pollution,
+                                                DateHelper::toUnixTimestamp(weatherInfo.pollutionTimestamp));
+
+                this->iotClient->sendMessage(this->getJSON(weatherInfo));
+
+            } catch (WeatherInformationError wis) {
+                BOOST_LOG_TRIVIAL(error) << wis.what();
+            }
 
             ptime now = second_clock::local_time();
-            while (this->schedule.begin()->second < now) {
+            while (this->schedule.size() != 0 && this->schedule.begin()->second < now) {
                 this->schedule.erase(this->schedule.begin());
             }
 
             if (this->schedule.size() != 0) {
                 auto nextSchedule = this->schedule.begin();
                 if (nextSchedule->first < now) {
-                    this->schedulePublisher->publish(true, (nextSchedule->second - epoch).total_seconds(),
-                                                     (now - epoch).total_seconds());
+                    this->schedulePublisher->publish(true, DateHelper::toUnixTimestamp(nextSchedule->second),
+                                                     DateHelper::toUnixTimestamp(now));
                 } else {
-
-                    this->schedulePublisher->publish(false, (nextSchedule->first - epoch).total_seconds(),
-                                                     (now - epoch).total_seconds());
+                    this->schedulePublisher->publish(false, DateHelper::toUnixTimestamp(nextSchedule->first),
+                                                     DateHelper::toUnixTimestamp(now));
                 }
-
             }
 
             std::this_thread::sleep_for(3s);
         }
     });
 
+
+}
+
+
+void HumidityEdge::archiveDecisionData(const DecisionInfo &data) {
+    Document lastWeatherJSON;
+    const Weather& lastWeather = data.lastWeather();
+    lastWeatherJSON.SetObject();
+
+
+
+    // TODO
+    /*Document messateToCloud;
+    messateToCloud.SetObject();
+    auto &allocator = messateToCloud.GetAllocator();
+    messateToCloud.AddMember("temperature", Value(weatherInfo.temperature), allocator);
+    messateToCloud.AddMember("temperatureTimestamp", Value(tempTS.c_str(), allocator), allocator);
+    messateToCloud.AddMember("pollution", Value(weatherInfo.pollution), allocator);
+    messateToCloud.AddMember("pollutionTimestamp", Value(pollTS.c_str(), allocator), allocator);
+
+    messateToCloud.AddMember("messageTimestamp", Value(messageTS.c_str(), allocator), allocator);
+    messateToCloud.AddMember("type", Value("weather_from_edge", allocator), allocator);*/
 }
 
 void HumidityEdge::stop() {
@@ -125,6 +153,7 @@ void HumidityEdge::stop() {
         this->workerThread.join();
     }
     this->iotClient->stop();
+    this->decisionSubscriber->stopReceiving();
 
 }
 
