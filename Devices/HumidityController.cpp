@@ -2,6 +2,8 @@
 // Created by kovi on 12/10/17.
 //
 
+#include <chrono>
+
 #include "HumidityController.hpp"
 
 #include <boost/log/core.hpp>
@@ -11,6 +13,7 @@
 #include <Util/DateHelper.hpp>
 
 using namespace boost::posix_time;
+using namespace std::chrono_literals;
 
 HumidityController::HumidityController() :
         weatherSubscriber(new WeatherSubscriber()),
@@ -43,7 +46,13 @@ void HumidityController::start() {
     configSubscriber->startReceiving(std::bind(&HumidityController::receiveConfig, this, _1));
     humiditySubscriber->startReceiving(std::bind(&HumidityController::receiveHumidity, this, _1));
 
-    // TODO start worker thread
+    this->workerThread = std::thread([this]() {
+        while (this->isRunning.load()) {
+            this->makeDecision();
+            std::this_thread::sleep_for(5min);
+        }
+
+    });
 }
 
 void HumidityController::stop() {
@@ -71,7 +80,7 @@ bool HumidityController::isAllDataAvailable() {
     ptime lastPollTS = DateHelper::toPTime(lastWeather->pollTS());
     ts = to_iso_extended_string(lastPollTS);
     // it should newer, but the airvisual weather api provides new data only once an hour
-    if (now - lastTempTS > minutes(75) || now - lastPollTS > minutes(75)) {
+    if (now - lastTempTS > minutes(90) || now - lastPollTS > minutes(90k)) {
         return false;
     }
 
@@ -157,15 +166,21 @@ void HumidityController::makeDecision() {
         this->lastDecision = Decision::CLOSE;
         return;
     }
+
+    uint32_t maxHum = this->actualConfig->maxHumidity();
+    uint32_t minHum = this->actualConfig->minHumidity();
+    if (!this->lastSchedule->scheduled()) {
+        maxHum = maxHum * 100 / 90;
+        minHum = minHum * 90 / 100;
+    }
+
     BOOST_LOG_TRIVIAL(debug) << "Making real decision...";
     if (this->lastWeather->temperature() > this->actualConfig->maxTemperature() &&
         this->lastWeather->pollution() > this->actualConfig->maxPollution()) {
         this->lastDecision = Decision::CLOSE;
-    } else if (this->lastDecision == Decision::CLOSE &&
-               this->lastHumidity->Value() >= this->actualConfig->maxHumidity()) {
+    } else if (this->lastDecision == Decision::CLOSE && this->lastHumidity->Value() >= maxHum) {
         this->lastDecision = Decision::OPEN;
-    } else if (this->lastDecision == Decision::OPEN &&
-               this->lastHumidity->Value() <= this->actualConfig->minHumidity()) {
+    } else if (this->lastDecision == Decision::OPEN && this->lastHumidity->Value() <= minHum) {
         this->lastDecision = Decision::CLOSE;
     }
 
