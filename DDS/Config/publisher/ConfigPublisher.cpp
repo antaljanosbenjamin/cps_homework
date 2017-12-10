@@ -17,7 +17,7 @@ using namespace dds::domain;
 using namespace dds::topic;
 using namespace dds::pub;
 
-ConfigPublisher::ConfigPublisher() : AbstractPublisher(42, "schedule_info") {
+ConfigPublisher::ConfigPublisher() : AbstractPublisher(42, "config") {
 }
 
 void ConfigPublisher::publish(double maxTemperature, unsigned long maxPollution, unsigned long minHumidity, unsigned long maxHumidity) {

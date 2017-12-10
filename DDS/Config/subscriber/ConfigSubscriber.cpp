@@ -6,7 +6,7 @@
 
 
 ConfigSubscriber::ConfigSubscriber()
-        : AbstractSubscriber(42, "schedule_info", 1) {
+        : AbstractSubscriber(42, "config", 1) {
 
 }
 

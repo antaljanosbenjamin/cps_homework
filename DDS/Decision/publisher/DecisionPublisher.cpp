@@ -10,7 +10,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 
-#include "SchedulePublisher.hpp"
+#include "DecisionPublisher.hpp"
 
 using namespace dds::core;
 using namespace dds::domain;

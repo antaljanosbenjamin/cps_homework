@@ -37,7 +37,7 @@ set(SCHEDULE_COMMON_HEADERS DDS/Schedule/common/Schedule.hpp DDS/Schedule/common
 set(SCHEDULE_PUB_SOURCES ${DDS_SOURCES} DDS/Schedule/publisher/SchedulePublisher.cpp)
 set(SCHEDULE_PUB_HEADERS DDS/Schedule/publisher/SchedulePublisher.hpp)
 
-set(SCHEDULE_SUB_SOURCES DDS/Schedule/subscriber/DecisionSubscriber.cpp)
+set(SCHEDULE_SUB_SOURCES DDS/Schedule/subscriber/ScheduleSubscriber.cpp)
 set(SCHEDULE_SUB_HEADERS DDS/Schedule/subscriber/ScheduleSubscriber.hpp)
 
 set(SCHEDULE_ALL_SOURCES ${SCHEDULE_COMMON_SOURCES}
@@ -63,7 +63,7 @@ set(DECISION_COMMON_SOURCES DDS/Decision/common/Decision.cxx DDS/Decision/common
 set(DECISION_COMMON_HEADERS DDS/Decision/common/Decision.hpp DDS/Decision/common/DecisionPlugin.hpp)
 
 set(DECISION_PUB_SOURCES ${DDS_SOURCES} DDS/Decision/publisher/DecisionPublisher.cpp)
-set(DECISION_PUB_HEADERS DDS/Decision/publisher/SchedulePublisher.hpp)
+set(DECISION_PUB_HEADERS DDS/Decision/publisher/DecisionPublisher.hpp)
 
 set(DECISION_SUB_SOURCES DDS/Decision/subscriber/DecisionSubscriber.cpp)
 set(DECISION_SUB_HEADERS DDS/Decision/subscriber/DecisionSubscriber.hpp)
@@ -71,6 +71,20 @@ set(DECISION_SUB_HEADERS DDS/Decision/subscriber/DecisionSubscriber.hpp)
 set(DECISION_ALL_SOURCES ${DECISION_COMMON_SOURCES}
         ${DECISION_PUB_SOURCES}
         ${DECISION_SUB_SOURCES})
+
+# HUMIDITY
+set(HUMIDITY_COMMON_SOURCES DDS/Humidity/common/UvegHaz.cxx DDS/Humidity/common/UvegHazPlugin.cxx)
+set(HUMIDITY_COMMON_HEADERS DDS/Humidity/common/UvegHaz.hpp DDS/Humidity/common/UvegHazPlugin.hpp)
+
+set(HUMIDITY_PUB_SOURCES ${DDS_SOURCES} DDS/Humidity/publisher/HumidityPublisher.cpp)
+set(HUMIDITY_PUB_HEADERS DDS/Humidity/publisher/HumidityPublisher.hpp)
+
+set(HUMIDITY_SUB_SOURCES DDS/Humidity/subscriber/HumiditySubscriber.cpp)
+set(HUMIDITY_SUB_HEADERS DDS/Humidity/subscriber/HumiditySubscriber.hpp)
+
+set(HUMIDITY_ALL_SOURCES ${HUMIDITY_COMMON_SOURCES}
+        ${HUMIDITY_PUB_SOURCES}
+        ${HUMIDITY_SUB_SOURCES})
 
 # AzureWrapper
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
@@ -99,7 +113,7 @@ set(EDGE_SOURCES "Devices/HumidityEdge.cpp")
 # Final target
 include_directories(".")
 add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} 
-        ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} ${DECISION_ALL_SOURCES} main.cpp)
+        ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} ${DECISION_ALL_SOURCES} ${HUMIDITY_ALL_SOURCES} main.cpp)
 target_link_libraries(cps_main
         nddscpp2z
         nddscz
