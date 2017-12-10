@@ -45,13 +45,15 @@ DecisionInfo::DecisionInfo (
     const Decision& decision,
     const Config& config,
     const Weather& lastWeather,
-    const Schedule& lastSchedule)
+    const Schedule& lastSchedule,
+    const UvegHaz& lastHumidity)
     :
         m_decisionTS_( decisionTS ),
         m_decision_( decision ),
         m_config_( config ),
         m_lastWeather_( lastWeather ),
-        m_lastSchedule_( lastSchedule ) {
+        m_lastSchedule_( lastSchedule ),
+        m_lastHumidity_( lastHumidity ) {
 }
 
 #ifdef RTI_CXX11_RVALUE_REFERENCES
@@ -65,6 +67,8 @@ m_config_ (std::move(other_.m_config_))
 m_lastWeather_ (std::move(other_.m_lastWeather_))
 ,
 m_lastSchedule_ (std::move(other_.m_lastSchedule_))
+,
+m_lastHumidity_ (std::move(other_.m_lastHumidity_))
 {
 } 
 
@@ -84,6 +88,7 @@ void DecisionInfo::swap(DecisionInfo& other_)  OMG_NOEXCEPT
     swap(m_config_, other_.m_config_);
     swap(m_lastWeather_, other_.m_lastWeather_);
     swap(m_lastSchedule_, other_.m_lastSchedule_);
+    swap(m_lastHumidity_, other_.m_lastHumidity_);
 }  
 
 bool DecisionInfo::operator == (const DecisionInfo& other_) const {
@@ -100,6 +105,9 @@ bool DecisionInfo::operator == (const DecisionInfo& other_) const {
         return false;
     }
     if (m_lastSchedule_ != other_.m_lastSchedule_) {
+        return false;
+    }
+    if (m_lastHumidity_ != other_.m_lastHumidity_) {
         return false;
     }
     return true;
@@ -169,6 +177,18 @@ void DecisionInfo::lastSchedule(const Schedule& value) {
     m_lastSchedule_ = value;
 }
 
+UvegHaz& DecisionInfo::lastHumidity() OMG_NOEXCEPT {
+    return m_lastHumidity_;
+}
+
+const UvegHaz& DecisionInfo::lastHumidity() const OMG_NOEXCEPT {
+    return m_lastHumidity_;
+}
+
+void DecisionInfo::lastHumidity(const UvegHaz& value) {
+    m_lastHumidity_ = value;
+}
+
 std::ostream& operator << (std::ostream& o,const DecisionInfo& sample)
 {
     rti::util::StreamFlagSaver flag_saver (o);
@@ -177,7 +197,8 @@ std::ostream& operator << (std::ostream& o,const DecisionInfo& sample)
     o << "decision: " << sample.decision()<<", ";
     o << "config: " << sample.config()<<", ";
     o << "lastWeather: " << sample.lastWeather()<<", ";
-    o << "lastSchedule: " << sample.lastSchedule() ;
+    o << "lastSchedule: " << sample.lastSchedule()<<", ";
+    o << "lastHumidity: " << sample.lastHumidity() ;
     o <<"]";
     return o;
 }
@@ -272,7 +293,7 @@ namespace rti {
             {
                 static RTIBool is_initialized = RTI_FALSE;
 
-                static DDS_TypeCode_Member DecisionInfo_g_tc_members[5]=
+                static DDS_TypeCode_Member DecisionInfo_g_tc_members[6]=
                 {
 
                     {
@@ -359,6 +380,23 @@ namespace rti {
                         DDS_PUBLIC_MEMBER,/* Member visibility */
                         1,
                         NULL/* Ignored */
+                    }, 
+                    {
+                        (char *)"lastHumidity",/* Member name */
+                        {
+                            5,/* Representation ID */          
+                            DDS_BOOLEAN_FALSE,/* Is a pointer? */
+                            -1, /* Bitfield bits */
+                            NULL/* Member type code is assigned later */
+                        },
+                        0, /* Ignored */
+                        0, /* Ignored */
+                        0, /* Ignored */
+                        NULL, /* Ignored */
+                        RTI_CDR_REQUIRED_MEMBER, /* Is a key? */
+                        DDS_PUBLIC_MEMBER,/* Member visibility */
+                        1,
+                        NULL/* Ignored */
                     }
                 };
 
@@ -372,7 +410,7 @@ namespace rti {
                         0, /* Ignored */
                         0, /* Ignored */
                         NULL, /* Ignored */
-                        5, /* Number of members */
+                        6, /* Number of members */
                         DecisionInfo_g_tc_members, /* Members */
                         DDS_VM_NONE  /* Ignored */         
                     }}; /* Type code for DecisionInfo*/
@@ -390,6 +428,8 @@ namespace rti {
                 DecisionInfo_g_tc_members[3]._representation._typeCode = (RTICdrTypeCode *)&rti::topic::dynamic_type< Weather>::get().native();
 
                 DecisionInfo_g_tc_members[4]._representation._typeCode = (RTICdrTypeCode *)&rti::topic::dynamic_type< Schedule>::get().native();
+
+                DecisionInfo_g_tc_members[5]._representation._typeCode = (RTICdrTypeCode *)&rti::topic::dynamic_type< UvegHaz>::get().native();
 
                 is_initialized = RTI_TRUE;
 
@@ -466,6 +506,7 @@ namespace dds {
             rti::topic::reset_sample(sample.config());
             rti::topic::reset_sample(sample.lastWeather());
             rti::topic::reset_sample(sample.lastSchedule());
+            rti::topic::reset_sample(sample.lastHumidity());
         }
 
         void topic_type_support<DecisionInfo>::allocate_sample(DecisionInfo& sample, int, int) 
@@ -474,6 +515,7 @@ namespace dds {
             rti::topic::allocate_sample(sample.config(),  -1, -1);
             rti::topic::allocate_sample(sample.lastWeather(),  -1, -1);
             rti::topic::allocate_sample(sample.lastSchedule(),  -1, -1);
+            rti::topic::allocate_sample(sample.lastHumidity(),  -1, -1);
         }
 
     }

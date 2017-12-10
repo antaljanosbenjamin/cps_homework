@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef Decision_839300793_hpp
-#define Decision_839300793_hpp
+#ifndef Decision_839300842_hpp
+#define Decision_839300842_hpp
 
 #include <iosfwd>
 
@@ -94,6 +94,19 @@ or consult the RTI Connext manual.
 #undef NDDSUSERDllExport
 #define NDDSUSERDllExport __declspec(dllexport)
 #endif
+#if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)
+/* If the code is building on Windows, stop exporting symbols.
+*/
+#undef NDDSUSERDllExport
+#define NDDSUSERDllExport
+#endif
+#include "DDS/Humidity/common/UvegHaz.hpp"
+#if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)
+/* If the code is building on Windows, start exporting symbols.
+*/
+#undef NDDSUSERDllExport
+#define NDDSUSERDllExport __declspec(dllexport)
+#endif
 struct Decision_def {
     enum type {
         OPEN,      
@@ -114,7 +127,8 @@ class NDDSUSERDllExport DecisionInfo {
         const Decision& decision,
         const Config& config,
         const Weather& lastWeather,
-        const Schedule& lastSchedule);
+        const Schedule& lastSchedule,
+        const UvegHaz& lastHumidity);
 
     #ifdef RTI_CXX11_RVALUE_REFERENCES
     #ifndef RTI_CXX11_NO_IMPLICIT_MOVE_OPERATIONS
@@ -148,6 +162,10 @@ class NDDSUSERDllExport DecisionInfo {
     const Schedule& lastSchedule() const OMG_NOEXCEPT;
     void lastSchedule(const Schedule& value);
 
+    UvegHaz& lastHumidity() OMG_NOEXCEPT; 
+    const UvegHaz& lastHumidity() const OMG_NOEXCEPT;
+    void lastHumidity(const UvegHaz& value);
+
     bool operator == (const DecisionInfo& other_) const;
     bool operator != (const DecisionInfo& other_) const;
 
@@ -160,6 +178,7 @@ class NDDSUSERDllExport DecisionInfo {
     Config m_config_;
     Weather m_lastWeather_;
     Schedule m_lastSchedule_;
+    UvegHaz m_lastHumidity_;
 
 };
 
@@ -247,5 +266,5 @@ namespace rti {
 #define NDDSUSERDllExport
 #endif
 
-#endif // Decision_839300793_hpp
+#endif // Decision_839300842_hpp
 

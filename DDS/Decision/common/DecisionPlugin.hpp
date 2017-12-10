@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef DecisionPlugin_839300793_h
-#define DecisionPlugin_839300793_h
+#ifndef DecisionPlugin_839300842_h
+#define DecisionPlugin_839300842_h
 
 #include "Decision.hpp"
 
@@ -23,6 +23,7 @@ struct RTICdrStream;
 #include "DDS/Weather/common/WeatherPlugin.hpp"
 #include "DDS/Config/common/ConfigPlugin.hpp"
 #include "DDS/Schedule/common/SchedulePlugin.hpp"
+#include "DDS/Humidity/common/UvegHazPlugin.hpp"
 
 #if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)
 /* If the code is building on Windows, start exporting symbols.
@@ -387,5 +388,5 @@ DecisionInfoPlugin_delete(struct PRESTypePlugin *);
 #define NDDSUSERDllExport
 #endif
 
-#endif /* DecisionPlugin_839300793_h */
+#endif /* DecisionPlugin_839300842_h */
 

@@ -44,10 +44,10 @@ void IoTHubClient::init() {
 
 void IoTHubClient::initWithoutLock() {
     if (initialized) {
-        BOOST_LOG_TRIVIAL(debug) << "Already initialized....";
+        BOOST_LOG_TRIVIAL(debug) << "Already initialized...";
         return;
     }
-    BOOST_LOG_TRIVIAL(debug) << "Init....";
+    BOOST_LOG_TRIVIAL(debug) << "Init...";
     if (platform_init()) {
         BOOST_LOG_TRIVIAL(error) << "Failed to initialize the platform!";
         throw std::runtime_error("Failed to initialize the platform!");
@@ -62,11 +62,11 @@ void IoTHubClient::finalize() {
 
 void IoTHubClient::finalizeWithoutLock() {
     if (!initialized) {
-        BOOST_LOG_TRIVIAL(debug) << "Already finalized....";
+        BOOST_LOG_TRIVIAL(debug) << "Already finalized...";
         return;
     }
     if (livingClients.size() != 0) {
-        BOOST_LOG_TRIVIAL(error) << "There are living clients....";
+        BOOST_LOG_TRIVIAL(error) << "There are living clients...";
     }
     BOOST_LOG_TRIVIAL(debug) << "Finalize...";
     platform_deinit();
@@ -98,15 +98,15 @@ IoTHubClient::IoTHubClient(const std::string &connectionString,
 
         if (IHC(SetMessageCallback)(this->clientHandle, receiveMessage, this) !=
             IOTHUB_CLIENT_OK) {
-            BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SetMessageCallback..........FAILED!";
-            throw std::runtime_error("IoTHubClient_SetMessageCallback..........FAILED!");
+            BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SetMessageCallback........FAILED!";
+            throw std::runtime_error("IoTHubClient_SetMessageCallback........FAILED!");
         }
 
         BOOST_LOG_TRIVIAL(debug) << "Init successful!";
 
     } else {
-        BOOST_LOG_TRIVIAL(error) << "IoTHubClient_LL_CreateFromConnectionString..........FAILED!";
-        throw std::runtime_error("IoTHubClient_LL_CreateFromConnectionString..........FAILED!");
+        BOOST_LOG_TRIVIAL(error) << "IoTHubClient_LL_CreateFromConnectionString........FAILED!";
+        throw std::runtime_error("IoTHubClient_LL_CreateFromConnectionString........FAILED!");
     }
 }
 
@@ -208,7 +208,7 @@ void IoTHubClient::confirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
 void IoTHubClient::doWork() {
 
     while (canRun.load()) {
-        BOOST_LOG_TRIVIAL(debug) << "Do some work....";
+        BOOST_LOG_TRIVIAL(debug) << "Do some work...";
         IoTHubClient_LL_DoWork(this->clientHandle);
         std::this_thread::sleep_for(1s);
     }
@@ -220,10 +220,10 @@ void IoTHubClient::doWork() {
     }
     size_t remainingConfirmation = notConfirmedInstanceCount;
     size_t trialCount = 0;
-    BOOST_LOG_TRIVIAL(debug) << "Stopping....";
+    BOOST_LOG_TRIVIAL(debug) << "Stopping IoTHubClient...";
     // best effort to send all message
     while (trialCount < notConfirmedInstanceCount * 10 && remainingConfirmation > 0) {
-        BOOST_LOG_TRIVIAL(debug) << "Do some more work...." << remainingConfirmation;
+        BOOST_LOG_TRIVIAL(debug) << "Do some more work..." << remainingConfirmation;
         IHC(DoWork)(this->clientHandle);
         {
             std::lock_guard<std::mutex> ownLock(this->ownMutex);
@@ -284,7 +284,7 @@ void IoTHubClient::sendMessage(const rapidjson::Document &message) {
         if (IHC(SendEventAsync)(this->clientHandle, eventInstance->messageHandle, confirmationCallback,
                                 eventInstance) != IOTHUB_CLIENT_OK) {
             this->addToNotConfirmedIntances(eventInstance);
-            BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SendEventAsync..........FAILED!";
+            BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SendEventAsync........FAILED!";
             this->removeFromEventInstanceMapping(eventInstance);
         } else {
             BOOST_LOG_TRIVIAL(debug)

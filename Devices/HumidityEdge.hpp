@@ -36,7 +36,7 @@ private:
 
     void receiveMessageFromCloud(const rapidjson::Document & message );
 
-    rapidjson::Document getJSON(const WeatherInformationService::WeatherInfo &weatherInfo);
+    rapidjson::Document getWeatherInfoJSON(const WeatherInformationService::WeatherInfo &weatherInfo);
 
     void readSchedule();
 

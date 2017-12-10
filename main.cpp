@@ -47,41 +47,25 @@ int main(int argc, const char **argv) {
     }
 
     if (argv[1][0] == 'e') {
-        HumidityEdge edge(weatherAPIKey, connectionString, "");
+        HumidityEdge edge(argv[2], argv[3], argv[4]);
         edge.start();
-        std::this_thread::sleep_for(65s);
-        edge.stop();
-        std::cout << "stopped!" << std::endl;
-        edge.start();
-        std::this_thread::sleep_for(65s);
-        edge.stop();
-        std::cout << "stopped!" << std::endl;
-
-    } else if (argv[1][0] == 's') {
+        // dds::domain::DomainParticipant::finalize_participant_factory();
+        while(true){
+            std::string input;
+            std::cin >> input;
+            if (input == "stop"){
+                edge.stop();
+            } else if (input == "start"){
+                edge.start();
+            } else if (input == "quit"){
+                edge.stop();
+                return 0;
+            }
+        }
+    } else if (argv[1][0] == 'c') {
         WeatherSubscriber sub;
         //sub.startReceiving();
-        dds::domain::DomainParticipant::finalize_participant_factory();
-    } else if (argv[1][0] == 'a') {
-        std::function<void(const rapidjson::Document &)> consumer = [](const rapidjson::Document &) {
-            std::cout << "I got it..." << std::endl;
-        };
-        IoTHubClient client(connectionString, consumer, false, 350);
-        std::ifstream myfile;
-        double value;
-        auto timestamp = second_clock::local_time() - hours(200);
-        myfile.open("/home/kovi/tmp/input.csv", std::ios::in);
-        myfile >> value;
-        client.sendMessage(getMessage(timestamp, value));
-        std::this_thread::sleep_for(45s);
-        while (myfile >> value) {
-            timestamp += minutes(10);
-            client.sendMessage(getMessage(timestamp, value));
-            std::this_thread::sleep_for(10ms);
-        }
-        std::this_thread::sleep_for(100s);
-    } else if (argv[1][0] == 'w') {
-        WeatherInformationService service(weatherAPIKey);
-        std::cout << service.getWeatherInfoAsString(47.4985f, 19.0527f, 4);
-        std::cout << service.getWeatherInfo(47.4985f, 19.0527f, 4).pollutionTimestamp;
+    } else if (argv[1][0] == 'h') {
+
     }
 }

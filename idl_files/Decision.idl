@@ -1,6 +1,7 @@
 #include <Weather.idl>
 #include <Config.idl>
 #include <Schedule.idl>
+#include <UvegHaz.idl>
 
 enum Decision { OPEN, CLOSE };
 
@@ -10,4 +11,5 @@ struct DecisionInfo {
     Config config;
     Weather lastWeather;
     Schedule lastSchedule;
+    UvegHaz lastHumidity;
 };

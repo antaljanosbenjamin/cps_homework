@@ -681,6 +681,16 @@ DecisionInfoPlugin_serialize(
                 return RTI_FALSE;
             }
 
+            if(!UvegHazPlugin_serialize(
+                endpoint_data,
+                &sample->lastHumidity(),
+                stream,
+                RTI_FALSE, encapsulation_id,
+                RTI_TRUE,
+                endpoint_plugin_qos)) {
+                return RTI_FALSE;
+            }
+
         }
 
         if(serialize_encapsulation) {
@@ -751,6 +761,14 @@ DecisionInfoPlugin_deserialize_sample(
         if(!SchedulePlugin_deserialize_sample(
             endpoint_data,
             &sample->lastSchedule(),
+            stream,
+            RTI_FALSE, RTI_TRUE,
+            endpoint_plugin_qos)) {
+            goto fin; 
+        }
+        if(!UvegHazPlugin_deserialize_sample(
+            endpoint_data,
+            &sample->lastHumidity(),
             stream,
             RTI_FALSE, RTI_TRUE,
             endpoint_plugin_qos)) {
@@ -937,6 +955,13 @@ RTIBool DecisionInfoPlugin_skip(
             endpoint_plugin_qos)) {
             goto fin; 
         }
+        if (!UvegHazPlugin_skip(
+            endpoint_data,
+            stream, 
+            RTI_FALSE, RTI_TRUE, 
+            endpoint_plugin_qos)) {
+            goto fin; 
+        }
     }
 
     done = RTI_TRUE;
@@ -993,6 +1018,9 @@ DecisionInfoPlugin_get_serialized_sample_max_size_ex(
         endpoint_data, overflow, RTI_FALSE,encapsulation_id,current_alignment);
 
     current_alignment +=SchedulePlugin_get_serialized_sample_max_size_ex(
+        endpoint_data, overflow, RTI_FALSE,encapsulation_id,current_alignment);
+
+    current_alignment +=UvegHazPlugin_get_serialized_sample_max_size_ex(
         endpoint_data, overflow, RTI_FALSE,encapsulation_id,current_alignment);
 
     if (include_encapsulation) {
@@ -1060,6 +1088,8 @@ DecisionInfoPlugin_get_serialized_sample_min_size(
         current_alignment +=WeatherPlugin_get_serialized_sample_min_size(
             endpoint_data,RTI_FALSE,encapsulation_id,current_alignment);
         current_alignment +=SchedulePlugin_get_serialized_sample_min_size(
+            endpoint_data,RTI_FALSE,encapsulation_id,current_alignment);
+        current_alignment +=UvegHazPlugin_get_serialized_sample_min_size(
             endpoint_data,RTI_FALSE,encapsulation_id,current_alignment);
 
         if (include_encapsulation) {
@@ -1134,6 +1164,10 @@ DecisionInfoPlugin_get_serialized_sample_size(
         current_alignment += SchedulePlugin_get_serialized_sample_size(
             endpoint_data,RTI_FALSE, encapsulation_id,
             current_alignment, &sample->lastSchedule());
+
+        current_alignment += UvegHazPlugin_get_serialized_sample_size(
+            endpoint_data,RTI_FALSE, encapsulation_id,
+            current_alignment, &sample->lastHumidity());
 
         if (include_encapsulation) {
             current_alignment += encapsulation_size;
