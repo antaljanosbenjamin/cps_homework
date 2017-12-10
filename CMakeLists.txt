@@ -44,6 +44,20 @@ set(SCHEDULE_ALL_SOURCES ${SCHEDULE_COMMON_SOURCES}
         ${SCHEDULE_PUB_SOURCES}
         ${SCHEDULE_SUB_SOURCES})
 
+# CONFIG
+set(CONFIG_COMMON_SOURCES DDS/Config/common/Config.cxx DDS/Config/common/ConfigPlugin.cxx)
+set(CONFIG_COMMON_HEADERS DDS/Config/common/Config.hpp DDS/Config/common/ConfigPlugin.hpp)
+
+set(CONFIG_PUB_SOURCES ${DDS_SOURCES} DDS/Config/publisher/ConfigPublisher.cpp)
+set(CONFIG_PUB_HEADERS DDS/Config/publisher/ConfigPublisher.hpp)
+
+set(CONFIG_SUB_SOURCES DDS/Config/subscriber/ConfigSubscriber.cpp)
+set(CONFIG_SUB_HEADERS DDS/Config/subscriber/ConfigSubscriber.hpp)
+
+set(CONFIG_ALL_SOURCES ${CONFIG_COMMON_SOURCES}
+        ${CONFIG_PUB_SOURCES}
+        ${CONFIG_SUB_SOURCES})
+
 # AzureWrapper
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 set(RAPIDJSON_INC_FOLDER "/home/kovi/Repos/rapidjson/include")
@@ -70,7 +84,7 @@ set(EDGE_SOURCES "Devices/HumidityEdge.cpp")
 
 # Final target
 include_directories(".")
-add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} ${SCHEDULE_ALL_SOURCES} main.cpp)
+add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} main.cpp)
 target_link_libraries(cps_main
         nddscpp2z
         nddscz

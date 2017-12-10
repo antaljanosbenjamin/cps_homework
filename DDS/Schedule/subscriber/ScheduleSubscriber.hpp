@@ -5,9 +5,6 @@
 #ifndef PROJECT_SCHEDULESUBSCRIBER_HPP
 #define PROJECT_SCHEDULESUBSCRIBER_HPP
 
-
-
-
 #include "DDS/AbstractSubscriber.hpp"
 #include "DDS/Schedule/common/Schedule.hpp"
 

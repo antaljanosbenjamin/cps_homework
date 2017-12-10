@@ -21,6 +21,7 @@ HumidityEdge::HumidityEdge(const std::string &weatherApiKey, const std::string &
         weatherService(new WeatherInformationService(weatherApiKey)),
         weatherPublisher(new WeatherPublisher()),
         schedulePublisher(new SchedulePublisher()),
+        configPublisher(new ConfigPublisher()),
         iotClient(new IoTHubClient(azureConnectionString,
                                    [&](const Document &message) { this->receiveMessageFromCloud(message); })),
         isRunning(false) {
@@ -47,12 +48,12 @@ Document HumidityEdge::getJSON(const WeatherInformationService::WeatherInfo &wea
     return message;
 }
 
-void HumidityEdge::readSchedule(){
+void HumidityEdge::readSchedule() {
     std::ifstream scheduleFile;
     scheduleFile.open(this->scheduleFileName, std::ios::in);
     std::string startTS;
     std::string stopTS;
-    while(scheduleFile){
+    while (scheduleFile) {
         std::getline(scheduleFile, startTS, ',');
         std::getline(scheduleFile, stopTS, ',');
         ptime startTimestamp = from_iso_string(startTS);
@@ -63,12 +64,17 @@ void HumidityEdge::readSchedule(){
 }
 
 void HumidityEdge::receiveMessageFromCloud(const rapidjson::Document &message) {
-    // TODO
+
+    double maxTemperature = message["maximumTemperature"].GetDouble();
+    unsigned long maxPollution = message["maximumPollution"].GetUint64();
+    unsigned long minHumidity = message["minimumHumidity"].GetUint64();
+    unsigned long maxHumidity = message["maximumHumidity"].GetUint64();
+    this->configPublisher->publish(maxTemperature, maxPollution, minHumidity, maxHumidity);
 }
 
 void HumidityEdge::start() {
 
-    if(this->workerThread.joinable()){
+    if (this->workerThread.joinable()) {
         return;
     }
 
@@ -90,17 +96,19 @@ void HumidityEdge::start() {
             this->iotClient->sendMessage(this->getJSON(weatherInfo));
 
             ptime now = second_clock::local_time();
-            while(this->schedule.begin()->second < now){
+            while (this->schedule.begin()->second < now) {
                 this->schedule.erase(this->schedule.begin());
             }
 
-            if (this->schedule.size() != 0){
+            if (this->schedule.size() != 0) {
                 auto nextSchedule = this->schedule.begin();
-                if (nextSchedule->first < now){
-                    this->schedulePublisher->publish(true, (nextSchedule->second - epoch).total_seconds(), (now-epoch).total_seconds());
+                if (nextSchedule->first < now) {
+                    this->schedulePublisher->publish(true, (nextSchedule->second - epoch).total_seconds(),
+                                                     (now - epoch).total_seconds());
                 } else {
 
-                    this->schedulePublisher->publish(false, (nextSchedule->first - epoch).total_seconds(), (now-epoch).total_seconds());
+                    this->schedulePublisher->publish(false, (nextSchedule->first - epoch).total_seconds(),
+                                                     (now - epoch).total_seconds());
                 }
 
             }
@@ -113,7 +121,7 @@ void HumidityEdge::start() {
 
 void HumidityEdge::stop() {
     this->isRunning.store(false);
-    if(this->workerThread.joinable()){
+    if (this->workerThread.joinable()) {
         this->workerThread.join();
     }
     this->iotClient->stop();

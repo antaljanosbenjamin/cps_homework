@@ -1,0 +1,6 @@
+struct Config {
+    double maxTemperature;
+    unsigned long maxPollution;
+    unsigned long minHumidity;
+    unsigned long maxHumidity;
+};

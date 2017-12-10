@@ -13,6 +13,7 @@
 #include "Util/WeatherInformationService.hpp"
 #include "DDS/Weather/publisher/WeatherPublisher.hpp"
 #include "DDS/Schedule/publisher/SchedulePublisher.hpp"
+#include "DDS/Config/publisher/ConfigPublisher.hpp"
 #include "AzureWrapper/IoTHubClient.hpp"
 
 class HumidityEdge {
@@ -24,6 +25,7 @@ private:
     std::unique_ptr<WeatherInformationService> weatherService;
     std::unique_ptr<WeatherPublisher> weatherPublisher;
     std::unique_ptr<SchedulePublisher> schedulePublisher;
+    std::unique_ptr<ConfigPublisher> configPublisher;
     std::unique_ptr<IoTHubClient> iotClient;
     std::atomic<bool> isRunning;
     std::thread workerThread;
