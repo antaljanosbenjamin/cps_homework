@@ -3,14 +3,14 @@
 /*
 WARNING: THIS FILE IS AUTO-GENERATED. DO NOT MODIFY.
 
-This file was generated from Weather.idl using "rtiddsgen".
+This file was generated from Schedule.idl using "rtiddsgen".
 The rtiddsgen tool is part of the RTI Connext distribution.
 For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef Weather_1793541647_hpp
-#define Weather_1793541647_hpp
+#ifndef Schedule_1325351769_hpp
+#define Schedule_1325351769_hpp
 
 #include <iosfwd>
 
@@ -55,80 +55,74 @@ or consult the RTI Connext manual.
 #define NDDSUSERDllExport __declspec(dllexport)
 #endif
 
-class NDDSUSERDllExport Weather {
+class NDDSUSERDllExport Schedule {
 
   public:
-    Weather();
-    Weather(
-        double temperature,
-        uint32_t tempTS,
-        int32_t pollution,
-        uint32_t pollTS);
+    Schedule();
+    Schedule(
+        bool scheduled,
+        uint32_t until,
+        uint32_t sentTS);
 
     #ifdef RTI_CXX11_RVALUE_REFERENCES
     #ifndef RTI_CXX11_NO_IMPLICIT_MOVE_OPERATIONS
-    Weather (Weather&&) = default;
-    Weather& operator=(Weather&&) = default;
-    Weather& operator=(const Weather&) = default;
-    Weather(const Weather&) = default;
+    Schedule (Schedule&&) = default;
+    Schedule& operator=(Schedule&&) = default;
+    Schedule& operator=(const Schedule&) = default;
+    Schedule(const Schedule&) = default;
     #else
-    Weather(Weather&& other_) OMG_NOEXCEPT;  
-    Weather& operator=(Weather&&  other_) OMG_NOEXCEPT;
+    Schedule(Schedule&& other_) OMG_NOEXCEPT;  
+    Schedule& operator=(Schedule&&  other_) OMG_NOEXCEPT;
     #endif
     #endif 
 
-    double& temperature() OMG_NOEXCEPT; 
-    const double& temperature() const OMG_NOEXCEPT;
-    void temperature(double value);
+    bool& scheduled() OMG_NOEXCEPT; 
+    const bool& scheduled() const OMG_NOEXCEPT;
+    void scheduled(bool value);
 
-    uint32_t& tempTS() OMG_NOEXCEPT; 
-    const uint32_t& tempTS() const OMG_NOEXCEPT;
-    void tempTS(uint32_t value);
+    uint32_t& until() OMG_NOEXCEPT; 
+    const uint32_t& until() const OMG_NOEXCEPT;
+    void until(uint32_t value);
 
-    int32_t& pollution() OMG_NOEXCEPT; 
-    const int32_t& pollution() const OMG_NOEXCEPT;
-    void pollution(int32_t value);
+    uint32_t& sentTS() OMG_NOEXCEPT; 
+    const uint32_t& sentTS() const OMG_NOEXCEPT;
+    void sentTS(uint32_t value);
 
-    uint32_t& pollTS() OMG_NOEXCEPT; 
-    const uint32_t& pollTS() const OMG_NOEXCEPT;
-    void pollTS(uint32_t value);
+    bool operator == (const Schedule& other_) const;
+    bool operator != (const Schedule& other_) const;
 
-    bool operator == (const Weather& other_) const;
-    bool operator != (const Weather& other_) const;
-
-    void swap(Weather& other_) OMG_NOEXCEPT ;
+    void swap(Schedule& other_) OMG_NOEXCEPT ;
 
   private:
 
-    double m_temperature_;
-    uint32_t m_tempTS_;
-    int32_t m_pollution_;
-    uint32_t m_pollTS_;
+    bool m_scheduled_;
+    uint32_t m_until_;
+    uint32_t m_sentTS_;
 
 };
 
-inline void swap(Weather& a, Weather& b)  OMG_NOEXCEPT 
+inline void swap(Schedule& a, Schedule& b)  OMG_NOEXCEPT 
 {
     a.swap(b);
 }
 
-NDDSUSERDllExport std::ostream& operator<<(std::ostream& o, const Weather& sample);
+NDDSUSERDllExport std::ostream& operator<<(std::ostream& o, const Schedule& sample);
 
 namespace dds { 
     namespace topic {
 
         template<>
-        struct topic_type_name<Weather> {
+        struct topic_type_name<Schedule> {
             NDDSUSERDllExport static std::string value() {
-                return "Weather";
+                return "Schedule";
             }
         };
 
         template<>
-        struct is_topic_type<Weather> : public dds::core::true_type {};
+        struct is_topic_type<Schedule> : public dds::core::true_type {};
 
         template<>
-        struct topic_type_support<Weather> {
+        struct topic_type_support<Schedule> {
             NDDSUSERDllExport 
             static void register_type(
                 dds::domain::DomainParticipant& participant,
@@ -136,16 +130,16 @@ namespace dds {
 
             NDDSUSERDllExport 
             static std::vector<char>& to_cdr_buffer(
-                std::vector<char>& buffer, const Weather& sample);
+                std::vector<char>& buffer, const Schedule& sample);
 
             NDDSUSERDllExport 
-            static void from_cdr_buffer(Weather& sample, const std::vector<char>& buffer);
+            static void from_cdr_buffer(Schedule& sample, const std::vector<char>& buffer);
 
             NDDSUSERDllExport 
-            static void reset_sample(Weather& sample);
+            static void reset_sample(Schedule& sample);
 
             NDDSUSERDllExport 
-            static void allocate_sample(Weather& sample, int, int);
+            static void allocate_sample(Schedule& sample, int, int);
 
             static const rti::topic::TypePluginKind::type type_plugin_kind = 
             rti::topic::TypePluginKind::STL;
@@ -157,13 +151,13 @@ namespace dds {
 namespace rti { 
     namespace topic {
         template<>
-        struct dynamic_type<Weather> {
+        struct dynamic_type<Schedule> {
             typedef dds::core::xtypes::StructType type;
             NDDSUSERDllExport static const dds::core::xtypes::StructType& get();
         };
 
         template <>
-        struct extensibility<Weather> {
+        struct extensibility<Schedule> {
             static const dds::core::xtypes::ExtensibilityKind::type kind =
             dds::core::xtypes::ExtensibilityKind::EXTENSIBLE;                
         };
@@ -178,5 +172,5 @@ namespace rti {
 #define NDDSUSERDllExport
 #endif
 
-#endif // Weather_1793541647_hpp
+#endif // Schedule_1325351769_hpp
 

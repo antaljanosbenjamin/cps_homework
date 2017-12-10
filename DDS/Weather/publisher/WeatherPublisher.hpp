@@ -11,19 +11,15 @@
 #include <string>
 #include <dds/dds.hpp>
 #include "DDS/Weather/common/Weather.hpp"
+#include "DDS/AbstractPublisher.hpp"
 
-class WeatherPublisher {
+class WeatherPublisher : public AbstractPublisher<Weather> {
 public:
-    WeatherPublisher(int domain_id, const std::string& topic_name);
+    WeatherPublisher();
+
     ~WeatherPublisher();
 
-    void publish(int sample_count);
-
-private:
-    static const int MaxConsecutiveWriteErrors = 10;
-    dds::domain::DomainParticipant participant;
-    dds::topic::Topic<Weather> topic;
-    dds::pub::DataWriter<Weather> writer;
+    void publish(double temperature, unsigned long tempTimestamp, int32_t pollution, unsigned long pollTimestamp);
 };
 
 #endif

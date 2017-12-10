@@ -14,6 +14,7 @@
 
 using namespace boost::date_time;
 using namespace boost::posix_time;
+using namespace rapidjson;
 
 WeatherInformationError::WeatherInformationError(const std::string &cause) : std::runtime_error(cause) {}
 
@@ -33,15 +34,21 @@ WeatherInformationService::WeatherInformationService(const std::string &apiKey) 
 WeatherInformationService::WeatherInfo
 WeatherInformationService::getWeatherInfo(float latitude, float longitude, size_t precision) {
 
-    std::string stringWeatherInfo = this->getWeatherInfoAsString(longitude, latitude, precision);
+    std::string stringWeatherInfo = this->getWeatherInfoAsString(latitude, longitude, precision);
 
-    rapidjson::Document document;
+    Document document;
     if (document.Parse(stringWeatherInfo.c_str()).HasParseError()) {
-        throw WeatherInformationError("Can't parse response!");
+        std::stringstream error;
+        error << "Can't parse response! " << stringWeatherInfo;
+        throw WeatherInformationError(error.str());
     }
-    assert(document.IsObject());
-    assert(document.HasMember("data"));
-    assert(document["data"].IsObject());
+
+    if( document["status"] != "success"){
+        std::stringstream error;
+        error << "Getting weather info failed! " << stringWeatherInfo;
+        throw WeatherInformationError(error.str());
+    }
+
     int temperature = document["data"]["current"]["weather"]["tp"].GetInt();
     std::string tempTs = document["data"]["current"]["weather"]["ts"].GetString();
     int pollution = document["data"]["current"]["pollution"]["aqius"].GetInt();

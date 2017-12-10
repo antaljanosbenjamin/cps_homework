@@ -1,6 +1,6 @@
 struct Weather {
     double  temperature;
-    unsigned long long tempTS;
+    unsigned long tempTS;
     long    pollution;
-    unsigned long long pollTS;
+    unsigned long pollTS;
 };

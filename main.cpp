@@ -10,6 +10,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <fstream>
+#include <Devices/HumidityEdge.hpp>
 
 #include "DDS/Weather/publisher/WeatherPublisher.hpp"
 #include "DDS/Weather/subscriber/WeatherSubscriber.hpp"
@@ -21,7 +22,9 @@ using namespace boost::posix_time;
 using namespace std::chrono_literals;
 
 std::string connectionString(
-        "HostName=CPSHumidity.azure-devices.net;DeviceId=TrialDevice;SharedAccessKey=wlWbR3Md6fB+9f2i9+II+Y3tuI1HNle5Lnp2lGOIxVo=");
+        "hehe");
+
+std::string weatherAPIKey("hihi");
 
 Document getMessage(boost::posix_time::ptime time, double humidityValue) {
 
@@ -44,12 +47,19 @@ int main(int argc, const char **argv) {
         return -1;
     }
 
-    if (argv[1][0] == 'p') {
-        WeatherPublisher pub(0, "weather");
-        pub.publish(50);
-        dds::domain::DomainParticipant::finalize_participant_factory();
+    if (argv[1][0] == 'e') {
+        HumidityEdge edge(weatherAPIKey, connectionString, "");
+        edge.start();
+        std::this_thread::sleep_for(15s);
+        edge.stop();
+        std::cout << "stopped!" << std::endl;
+        edge.start();
+        std::this_thread::sleep_for(15s);
+        edge.stop();
+        std::cout << "stopped!" << std::endl;
+
     } else if (argv[1][0] == 's') {
-        WeatherSubscriber sub(0, "weather", 1);
+        WeatherSubscriber sub;
         sub.startReceiving();
         dds::domain::DomainParticipant::finalize_participant_factory();
     } else if (argv[1][0] == 'a') {
@@ -70,8 +80,8 @@ int main(int argc, const char **argv) {
             std::this_thread::sleep_for(10ms);
         }
         std::this_thread::sleep_for(100s);
-    } else if (argv[1][0] == 'w'){
-        WeatherInformationService service("dRyBT26mgdNhShwg9");
+    } else if (argv[1][0] == 'w') {
+        WeatherInformationService service(weatherAPIKey);
         std::cout << service.getWeatherInfoAsString(47.4985f, 19.0527f, 4);
         std::cout << service.getWeatherInfo(47.4985f, 19.0527f, 4).pollutionTimestamp;
     }

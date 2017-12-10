@@ -23,16 +23,16 @@ or consult the RTI Connext manual.
 
 Weather::Weather() :
     m_temperature_ (0.0) ,
-    m_tempTS_ (0ull) ,
+    m_tempTS_ (0u) ,
     m_pollution_ (0) ,
-    m_pollTS_ (0ull)  {
+    m_pollTS_ (0u)  {
 }   
 
 Weather::Weather (
     double temperature,
-    rti::core::uint64 tempTS,
+    uint32_t tempTS,
     int32_t pollution,
-    rti::core::uint64 pollTS)
+    uint32_t pollTS)
     :
         m_temperature_( temperature ),
         m_tempTS_( tempTS ),
@@ -101,15 +101,15 @@ void Weather::temperature(double value) {
     m_temperature_ = value;
 }
 
-rti::core::uint64& Weather::tempTS() OMG_NOEXCEPT {
+uint32_t& Weather::tempTS() OMG_NOEXCEPT {
     return m_tempTS_;
 }
 
-const rti::core::uint64& Weather::tempTS() const OMG_NOEXCEPT {
+const uint32_t& Weather::tempTS() const OMG_NOEXCEPT {
     return m_tempTS_;
 }
 
-void Weather::tempTS(rti::core::uint64 value) {
+void Weather::tempTS(uint32_t value) {
     m_tempTS_ = value;
 }
 
@@ -125,15 +125,15 @@ void Weather::pollution(int32_t value) {
     m_pollution_ = value;
 }
 
-rti::core::uint64& Weather::pollTS() OMG_NOEXCEPT {
+uint32_t& Weather::pollTS() OMG_NOEXCEPT {
     return m_pollTS_;
 }
 
-const rti::core::uint64& Weather::pollTS() const OMG_NOEXCEPT {
+const uint32_t& Weather::pollTS() const OMG_NOEXCEPT {
     return m_pollTS_;
 }
 
-void Weather::pollTS(rti::core::uint64 value) {
+void Weather::pollTS(uint32_t value) {
     m_pollTS_ = value;
 }
 
@@ -254,11 +254,11 @@ namespace rti {
 
                 Weather_g_tc_members[0]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_double;
 
-                Weather_g_tc_members[1]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulonglong;
+                Weather_g_tc_members[1]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulong;
 
                 Weather_g_tc_members[2]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_long;
 
-                Weather_g_tc_members[3]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulonglong;
+                Weather_g_tc_members[3]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulong;
 
                 is_initialized = RTI_TRUE;
 

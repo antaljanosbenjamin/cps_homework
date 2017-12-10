@@ -101,27 +101,42 @@ IoTHubClient::IoTHubClient(const std::string &connectionString,
             BOOST_LOG_TRIVIAL(error) << "IoTHubClient_SetMessageCallback..........FAILED!";
             throw std::runtime_error("IoTHubClient_SetMessageCallback..........FAILED!");
         }
-        this->workerThread = std::thread(&IoTHubClient::doWork, this);
 
         BOOST_LOG_TRIVIAL(debug) << "Init successful!";
 
-        livingClients.insert(this);
     } else {
         BOOST_LOG_TRIVIAL(error) << "IoTHubClient_LL_CreateFromConnectionString..........FAILED!";
         throw std::runtime_error("IoTHubClient_LL_CreateFromConnectionString..........FAILED!");
     }
 }
 
-IoTHubClient::~IoTHubClient() {
-    this->canRun.store(false);
-    this->workerThread.join();
+void IoTHubClient::start() {
+    this->canRun.store(true);
+    this->workerThread = std::thread(&IoTHubClient::doWork, this);
+    std::lock_guard<std::mutex> globalLock(globalMutex);
+    livingClients.insert(this);
+}
 
+void IoTHubClient::stop() {
+    this->stopWorkerThread();
+    std::lock_guard<std::mutex> globalLock(globalMutex);
+    livingClients.erase(this);
+}
+
+void IoTHubClient::stopWorkerThread() {
+    this->canRun.store(false);
+    if (this->workerThread.joinable()) {
+        this->workerThread.join();
+    }
+}
+
+IoTHubClient::~IoTHubClient() {
+    this->stopWorkerThread();
     std::lock_guard<std::mutex> globalLock(globalMutex);
 
     std::for_each(notConfirmedIntances.begin(), notConfirmedIntances.end(),
                   [&](EventInstance *eventInstance) { eventInstanceMapping.erase(eventInstance); });
 
-    livingClients.erase(this);
 
     IoTHubClient_LL_Destroy(this->clientHandle);
 
@@ -162,13 +177,9 @@ IoTHubClient::receiveMessage(IOTHUB_MESSAGE_HANDLE message, void *userContextCal
             BOOST_LOG_TRIVIAL(error) << "Failed getting the BINARY body of the message received.";
             return IOTHUBMESSAGE_ACCEPTED;
         }
-    } else if (contentType == IOTHUBMESSAGE_STRING) {
-        // TODO
     } else {
-        (void) printf("Failed getting the body of the message received (type %i).\r\n", contentType);
+        BOOST_LOG_TRIVIAL(error) << "Failed getting the body of the message received (type " << contentType << ")";
     }
-
-    /* Some device specific action code goes here... */
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
@@ -266,8 +277,6 @@ void IoTHubClient::sendMessage(const rapidjson::Document &message) {
         }
 
         // Setting messages with the same UUID values just for example.
-        IHM(SetMessageId)(eventInstance->messageHandle, "dec14a98-c5fc-430e-b4e3-33c1c434dcaf");
-        IHM(SetCorrelationId)(eventInstance->messageHandle, "33c1c434dcaf-c5fc-430e-b4e3-dec14a98");
         IHM(SetContentTypeSystemProperty)(eventInstance->messageHandle, "application/json");
         IHM(SetContentEncodingSystemProperty)(eventInstance->messageHandle, "utf-8");
 

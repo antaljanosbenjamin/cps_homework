@@ -2,16 +2,14 @@
 // Created by kovi on 12/6/17.
 //
 
-/*****************************************************************************/
-/*         (c) Copyright, Real-Time Innovations, All rights reserved.        */
-/*                                                                           */
-/*         Permission to modify and use for internal purposes granted.       */
-/* This software is provided "as is", without warranty, express or implied.  */
-/*****************************************************************************/
-
 #include <iostream>
 #include <string>
 #include <dds/dds.hpp>
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+
 #include "WeatherPublisher.hpp"
 
 using namespace dds::core;
@@ -20,43 +18,21 @@ using namespace dds::topic;
 using namespace dds::pub;
 
 WeatherPublisher::
-WeatherPublisher(int domain_id, const std::string &topic_name) :
-        participant(domain_id),
-        topic(participant, topic_name),
-        writer(Publisher(participant), topic) {
+WeatherPublisher() :
+        AbstractPublisher(42,"weather_info") {
 }
 
-void WeatherPublisher::publish(int sample_count) {
+void WeatherPublisher::publish(double temperature, unsigned long tempTimestamp, int32_t pollution,
+                               unsigned long pollTimestamp) {
 
     // Create an instance
     Weather instance;
-    instance.temperature() = 3.4;
-    instance.pollution() = 6;
+    instance.temperature() = temperature;
+    instance.tempTS() = tempTimestamp;
+    instance.pollution() = pollution;
+    instance.pollTS() = pollTimestamp;
 
-    // Write samples from the instance
-    std::cout << "Sending data..." << std::endl;
-    int errorCount = 0;
-    int success = 0;
-    while (success < 10 && errorCount < MaxConsecutiveWriteErrors) {
-
-        try {
-            instance.pollution() = success;
-            writer.write(instance);
-            std::cout << "Success!" << std::endl;
-            success++;
-        } catch (const TimeoutError& error) {
-            std::cout << error.what() << std::endl;
-            errorCount++;
-            if (errorCount == MaxConsecutiveWriteErrors) {
-                std::cerr << "! Reached maximum number of failure, "
-                          << "stopping writer..." << std::endl;
-                break;
-            }
-        }
-        rti::util::sleep(Duration::from_millisecs(1000));
-    }
-
-    writer.wait_for_acknowledgments(Duration::from_secs(10));
+    this->publishData(instance);
 
 }
 

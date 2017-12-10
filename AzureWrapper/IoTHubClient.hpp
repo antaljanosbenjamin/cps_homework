@@ -46,7 +46,7 @@ private:
     void removeFromNotConfirmedIntances(EventInstance *eventInstance);
 
     const std::string connectionString;
-    std::function<void(const rapidjson::Document &)> receivedMessageConsumer;
+    const std::function<void(const rapidjson::Document &)> receivedMessageConsumer;
     bool trace;
     uint32_t keepAlive;
 
@@ -69,6 +69,8 @@ private:
 
     static void finalizeWithoutLock();
 
+    void stopWorkerThread();
+
 
 public:
 
@@ -77,6 +79,10 @@ public:
                  uint32_t keepAlive = 240);
 
     ~IoTHubClient();
+
+    void start();
+
+    void stop();
 
     void sendMessage(const rapidjson::Document &message);
 };

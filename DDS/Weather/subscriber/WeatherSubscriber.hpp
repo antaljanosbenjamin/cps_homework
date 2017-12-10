@@ -5,31 +5,17 @@
 #ifndef PROJECT_WEATHERSUBSCRIBER_HPP
 #define PROJECT_WEATHERSUBSCRIBER_HPP
 
-#include <string>
-#include <dds/dds.hpp>
-#include <atomic>
-
+#include "DDS/AbstractSubscriber.hpp"
 #include "DDS/Weather/common/Weather.hpp"
 
-class WeatherSubscriber : public dds::sub::NoOpDataReaderListener<Weather> {
+class WeatherSubscriber : public AbstractSubscriber<Weather> {
 public:
 
-    WeatherSubscriber(int domain_id, const std::string &topic_name, int pollSeconds);
+    WeatherSubscriber();
 
-    ~WeatherSubscriber();
+    ~WeatherSubscriber() override;
 
-    void on_data_available(dds::sub::DataReader<Weather> &reader) override;
-
-    void startReceiving();
-
-    void stopReceiving();
-
-private:
-    dds::domain::DomainParticipant participant;
-    dds::topic::Topic<Weather> topic;
-    dds::sub::DataReader<Weather> reader;
-
-    std::atomic<int> pollSeconds;
+    void receiveData( const Weather & data);
 };
 
 #endif //PROJECT_WEATHERSUBSCRIBER_HPP

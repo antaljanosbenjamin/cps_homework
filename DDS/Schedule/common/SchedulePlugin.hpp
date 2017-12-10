@@ -3,16 +3,16 @@
 /*
 WARNING: THIS FILE IS AUTO-GENERATED. DO NOT MODIFY.
 
-This file was generated from Weather.idl using "rtiddsgen".
+This file was generated from Schedule.idl using "rtiddsgen".
 The rtiddsgen tool is part of the RTI Connext distribution.
 For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef WeatherPlugin_1793541647_h
-#define WeatherPlugin_1793541647_h
+#ifndef SchedulePlugin_1325351769_h
+#define SchedulePlugin_1325351769_h
 
-#include "Weather.hpp"
+#include "Schedule.hpp"
 
 struct RTICdrStream;
 
@@ -27,48 +27,48 @@ struct RTICdrStream;
 #define NDDSUSERDllExport __declspec(dllexport)
 #endif
 
-#define WeatherPlugin_get_sample PRESTypePluginDefaultEndpointData_getSample 
-#define WeatherPlugin_get_buffer PRESTypePluginDefaultEndpointData_getBuffer 
-#define WeatherPlugin_return_buffer PRESTypePluginDefaultEndpointData_returnBuffer 
+#define SchedulePlugin_get_sample PRESTypePluginDefaultEndpointData_getSample 
+#define SchedulePlugin_get_buffer PRESTypePluginDefaultEndpointData_getBuffer 
+#define SchedulePlugin_return_buffer PRESTypePluginDefaultEndpointData_returnBuffer 
 
-#define WeatherPlugin_create_sample PRESTypePluginDefaultEndpointData_createSample 
-#define WeatherPlugin_destroy_sample PRESTypePluginDefaultEndpointData_deleteSample 
+#define SchedulePlugin_create_sample PRESTypePluginDefaultEndpointData_createSample 
+#define SchedulePlugin_destroy_sample PRESTypePluginDefaultEndpointData_deleteSample 
 
 /* --------------------------------------------------------------------------------------
 Support functions:
 * -------------------------------------------------------------------------------------- */
 
-NDDSUSERDllExport extern Weather*
-WeatherPluginSupport_create_data_w_params(
+NDDSUSERDllExport extern Schedule*
+SchedulePluginSupport_create_data_w_params(
     const struct DDS_TypeAllocationParams_t * alloc_params);
 
-NDDSUSERDllExport extern Weather*
-WeatherPluginSupport_create_data_ex(RTIBool allocate_pointers);
+NDDSUSERDllExport extern Schedule*
+SchedulePluginSupport_create_data_ex(RTIBool allocate_pointers);
 
-NDDSUSERDllExport extern Weather*
-WeatherPluginSupport_create_data(void);
+NDDSUSERDllExport extern Schedule*
+SchedulePluginSupport_create_data(void);
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPluginSupport_copy_data(
-    Weather *out,
-    const Weather *in);
+SchedulePluginSupport_copy_data(
+    Schedule *out,
+    const Schedule *in);
 
 NDDSUSERDllExport extern void 
-WeatherPluginSupport_destroy_data_w_params(
-    Weather *sample,
+SchedulePluginSupport_destroy_data_w_params(
+    Schedule *sample,
     const struct DDS_TypeDeallocationParams_t * dealloc_params);
 
 NDDSUSERDllExport extern void 
-WeatherPluginSupport_destroy_data_ex(
-    Weather *sample,RTIBool deallocate_pointers);
+SchedulePluginSupport_destroy_data_ex(
+    Schedule *sample,RTIBool deallocate_pointers);
 
 NDDSUSERDllExport extern void 
-WeatherPluginSupport_destroy_data(
-    Weather *sample);
+SchedulePluginSupport_destroy_data(
+    Schedule *sample);
 
 NDDSUSERDllExport extern void 
-WeatherPluginSupport_print_data(
-    const Weather *sample,
+SchedulePluginSupport_print_data(
+    const Schedule *sample,
     const char *desc,
     unsigned int indent);
 
@@ -77,7 +77,7 @@ Callback functions:
 * ---------------------------------------------------------------------------- */
 
 NDDSUSERDllExport extern PRESTypePluginParticipantData 
-WeatherPlugin_on_participant_attached(
+SchedulePlugin_on_participant_attached(
     void *registration_data, 
     const struct PRESTypePluginParticipantInfo *participant_info,
     RTIBool top_level_registration, 
@@ -85,40 +85,40 @@ WeatherPlugin_on_participant_attached(
     RTICdrTypeCode *typeCode);
 
 NDDSUSERDllExport extern void 
-WeatherPlugin_on_participant_detached(
+SchedulePlugin_on_participant_detached(
     PRESTypePluginParticipantData participant_data);
 
 NDDSUSERDllExport extern PRESTypePluginEndpointData 
-WeatherPlugin_on_endpoint_attached(
+SchedulePlugin_on_endpoint_attached(
     PRESTypePluginParticipantData participant_data,
     const struct PRESTypePluginEndpointInfo *endpoint_info,
     RTIBool top_level_registration, 
     void *container_plugin_context);
 
 NDDSUSERDllExport extern void 
-WeatherPlugin_on_endpoint_detached(
+SchedulePlugin_on_endpoint_detached(
     PRESTypePluginEndpointData endpoint_data);
 
 NDDSUSERDllExport extern void    
-WeatherPlugin_return_sample(
+SchedulePlugin_return_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample,
+    Schedule *sample,
     void *handle);    
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_copy_sample(
+SchedulePlugin_copy_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *out,
-    const Weather *in);
+    Schedule *out,
+    const Schedule *in);
 
 /* ----------------------------------------------------------------------------
 (De)Serialize functions:
 * ------------------------------------------------------------------------- */
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_serialize(
+SchedulePlugin_serialize(
     PRESTypePluginEndpointData endpoint_data,
-    const Weather *sample,
+    const Schedule *sample,
     struct RTICdrStream *stream, 
     RTIBool serialize_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -126,24 +126,24 @@ WeatherPlugin_serialize(
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_deserialize_sample(
+SchedulePlugin_deserialize_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample, 
+    Schedule *sample, 
     struct RTICdrStream *stream,
     RTIBool deserialize_encapsulation,
     RTIBool deserialize_sample, 
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern RTIBool
-WeatherPlugin_serialize_to_cdr_buffer(
+SchedulePlugin_serialize_to_cdr_buffer(
     char * buffer,
     unsigned int * length,
-    const Weather *sample); 
+    const Schedule *sample); 
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_deserialize(
+SchedulePlugin_deserialize(
     PRESTypePluginEndpointData endpoint_data,
-    Weather **sample, 
+    Schedule **sample, 
     RTIBool * drop_sample,
     struct RTICdrStream *stream,
     RTIBool deserialize_encapsulation,
@@ -151,13 +151,13 @@ WeatherPlugin_deserialize(
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern RTIBool
-WeatherPlugin_deserialize_from_cdr_buffer(
-    Weather *sample,
+SchedulePlugin_deserialize_from_cdr_buffer(
+    Schedule *sample,
     const char * buffer,
     unsigned int length);    
 
 NDDSUSERDllExport extern RTIBool
-WeatherPlugin_skip(
+SchedulePlugin_skip(
     PRESTypePluginEndpointData endpoint_data,
     struct RTICdrStream *stream, 
     RTIBool skip_encapsulation,  
@@ -165,7 +165,7 @@ WeatherPlugin_skip(
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern unsigned int 
-WeatherPlugin_get_serialized_sample_max_size_ex(
+SchedulePlugin_get_serialized_sample_max_size_ex(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool * overflow,
     RTIBool include_encapsulation,
@@ -173,35 +173,35 @@ WeatherPlugin_get_serialized_sample_max_size_ex(
     unsigned int current_alignment);    
 
 NDDSUSERDllExport extern unsigned int 
-WeatherPlugin_get_serialized_sample_max_size(
+SchedulePlugin_get_serialized_sample_max_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment);
 
 NDDSUSERDllExport extern unsigned int 
-WeatherPlugin_get_serialized_sample_min_size(
+SchedulePlugin_get_serialized_sample_min_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment);
 
 NDDSUSERDllExport extern unsigned int
-WeatherPlugin_get_serialized_sample_size(
+SchedulePlugin_get_serialized_sample_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment,
-    const Weather * sample);
+    const Schedule * sample);
 
 /* --------------------------------------------------------------------------------------
 Key Management functions:
 * -------------------------------------------------------------------------------------- */
 NDDSUSERDllExport extern PRESTypePluginKeyKind 
-WeatherPlugin_get_key_kind(void);
+SchedulePlugin_get_key_kind(void);
 
 NDDSUSERDllExport extern unsigned int 
-WeatherPlugin_get_serialized_key_max_size_ex(
+SchedulePlugin_get_serialized_key_max_size_ex(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool * overflow,
     RTIBool include_encapsulation,
@@ -209,16 +209,16 @@ WeatherPlugin_get_serialized_key_max_size_ex(
     unsigned int current_alignment);
 
 NDDSUSERDllExport extern unsigned int 
-WeatherPlugin_get_serialized_key_max_size(
+SchedulePlugin_get_serialized_key_max_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment);
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_serialize_key(
+SchedulePlugin_serialize_key(
     PRESTypePluginEndpointData endpoint_data,
-    const Weather *sample,
+    const Schedule *sample,
     struct RTICdrStream *stream,
     RTIBool serialize_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -226,18 +226,18 @@ WeatherPlugin_serialize_key(
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_deserialize_key_sample(
+SchedulePlugin_deserialize_key_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather * sample,
+    Schedule * sample,
     struct RTICdrStream *stream,
     RTIBool deserialize_encapsulation,
     RTIBool deserialize_key,
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern RTIBool 
-WeatherPlugin_deserialize_key(
+SchedulePlugin_deserialize_key(
     PRESTypePluginEndpointData endpoint_data,
-    Weather ** sample,
+    Schedule ** sample,
     RTIBool * drop_sample,
     struct RTICdrStream *stream,
     RTIBool deserialize_encapsulation,
@@ -245,9 +245,9 @@ WeatherPlugin_deserialize_key(
     void *endpoint_plugin_qos);
 
 NDDSUSERDllExport extern RTIBool
-WeatherPlugin_serialized_sample_to_key(
+SchedulePlugin_serialized_sample_to_key(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample,
+    Schedule *sample,
     struct RTICdrStream *stream, 
     RTIBool deserialize_encapsulation,  
     RTIBool deserialize_key, 
@@ -255,10 +255,10 @@ WeatherPlugin_serialized_sample_to_key(
 
 /* Plugin Functions */
 NDDSUSERDllExport extern struct PRESTypePlugin*
-WeatherPlugin_new(void);
+SchedulePlugin_new(void);
 
 NDDSUSERDllExport extern void
-WeatherPlugin_delete(struct PRESTypePlugin *);
+SchedulePlugin_delete(struct PRESTypePlugin *);
 
 #if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)
 /* If the code is building on Windows, stop exporting symbols.
@@ -267,5 +267,5 @@ WeatherPlugin_delete(struct PRESTypePlugin *);
 #define NDDSUSERDllExport
 #endif
 
-#endif /* WeatherPlugin_1793541647_h */
+#endif /* SchedulePlugin_1325351769_h */
 

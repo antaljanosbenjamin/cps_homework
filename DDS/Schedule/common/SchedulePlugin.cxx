@@ -3,7 +3,7 @@
 /*
 WARNING: THIS FILE IS AUTO-GENERATED. DO NOT MODIFY.
 
-This file was generated from Weather.idl using "rtiddsgen".
+This file was generated from Schedule.idl using "rtiddsgen".
 The rtiddsgen tool is part of the RTI Connext distribution.
 For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
@@ -58,21 +58,21 @@ or consult the RTI Connext manual.
 
 #define RTI_CDR_CURRENT_SUBMODULE RTI_CDR_SUBMODULE_MASK_STREAM
 
-#include "WeatherPlugin.hpp"
+#include "SchedulePlugin.hpp"
 
 /* ----------------------------------------------------------------------------
-*  Type Weather
+*  Type Schedule
 * -------------------------------------------------------------------------- */
 
 /* -----------------------------------------------------------------------------
 Support functions:
 * -------------------------------------------------------------------------- */
 
-Weather *
-WeatherPluginSupport_create_data(void)
+Schedule *
+SchedulePluginSupport_create_data(void)
 {
     try {
-        Weather *sample = new Weather;    
+        Schedule *sample = new Schedule;    
         rti::topic::allocate_sample(*sample);
         return sample;
     } catch (...) {
@@ -81,16 +81,16 @@ WeatherPluginSupport_create_data(void)
 }
 
 void 
-WeatherPluginSupport_destroy_data(
-    Weather *sample) 
+SchedulePluginSupport_destroy_data(
+    Schedule *sample) 
 {
     delete sample;
 }
 
 RTIBool 
-WeatherPluginSupport_copy_data(
-    Weather *dst,
-    const Weather *src)
+SchedulePluginSupport_copy_data(
+    Schedule *dst,
+    const Schedule *src)
 {
     try {
         *dst = *src;
@@ -106,7 +106,7 @@ Callback functions:
 * ---------------------------------------------------------------------------- */
 
 PRESTypePluginParticipantData 
-WeatherPlugin_on_participant_attached(
+SchedulePlugin_on_participant_attached(
     void *registration_data,
     const struct PRESTypePluginParticipantInfo *participant_info,
     RTIBool top_level_registration,
@@ -124,7 +124,7 @@ WeatherPlugin_on_participant_attached(
 }
 
 void 
-WeatherPlugin_on_participant_detached(
+SchedulePlugin_on_participant_detached(
     PRESTypePluginParticipantData participant_data)
 {
 
@@ -132,7 +132,7 @@ WeatherPlugin_on_participant_detached(
 }
 
 PRESTypePluginEndpointData
-WeatherPlugin_on_endpoint_attached(
+SchedulePlugin_on_endpoint_attached(
     PRESTypePluginParticipantData participant_data,
     const struct PRESTypePluginEndpointInfo *endpoint_info,
     RTIBool top_level_registration, 
@@ -150,9 +150,9 @@ WeatherPlugin_on_endpoint_attached(
             participant_data,
             endpoint_info,
             (PRESTypePluginDefaultEndpointDataCreateSampleFunction)
-            WeatherPluginSupport_create_data,
+            SchedulePluginSupport_create_data,
             (PRESTypePluginDefaultEndpointDataDestroySampleFunction)
-            WeatherPluginSupport_destroy_data,
+            SchedulePluginSupport_destroy_data,
             NULL , NULL );
 
         if (epd == NULL) {
@@ -160,7 +160,7 @@ WeatherPlugin_on_endpoint_attached(
         } 
 
         if (endpoint_info->endpointKind == PRES_TYPEPLUGIN_ENDPOINT_WRITER) {
-            serializedSampleMaxSize = WeatherPlugin_get_serialized_sample_max_size(
+            serializedSampleMaxSize = SchedulePlugin_get_serialized_sample_max_size(
                 epd,RTI_FALSE,RTI_CDR_ENCAPSULATION_ID_CDR_BE,0);
 
             PRESTypePluginDefaultEndpointData_setMaxSizeSerializedSample(epd, serializedSampleMaxSize);
@@ -169,9 +169,9 @@ WeatherPlugin_on_endpoint_attached(
                 epd,
                 endpoint_info,
                 (PRESTypePluginGetSerializedSampleMaxSizeFunction)
-                WeatherPlugin_get_serialized_sample_max_size, epd,
+                SchedulePlugin_get_serialized_sample_max_size, epd,
                 (PRESTypePluginGetSerializedSampleSizeFunction)
-                WeatherPlugin_get_serialized_sample_size,
+                SchedulePlugin_get_serialized_sample_size,
                 epd) == RTI_FALSE) {
                 PRESTypePluginDefaultEndpointData_delete(epd);
                 return NULL;
@@ -185,7 +185,7 @@ WeatherPlugin_on_endpoint_attached(
 }
 
 void 
-WeatherPlugin_on_endpoint_detached(
+SchedulePlugin_on_endpoint_detached(
     PRESTypePluginEndpointData endpoint_data)
 {  
 
@@ -193,16 +193,16 @@ WeatherPlugin_on_endpoint_detached(
 }
 
 void    
-WeatherPlugin_return_sample(
+SchedulePlugin_return_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample,
+    Schedule *sample,
     void *handle)
 {
     try {
         rti::topic::reset_sample(*sample);
     } catch(const std::exception& ex) {
         RTICdrLog_exception(
-            "WeatherPlugin_return_sample",
+            "SchedulePlugin_return_sample",
             &RTI_LOG_ANY_FAILURE_s,
             "exception: ",
             ex.what());           
@@ -213,28 +213,28 @@ WeatherPlugin_return_sample(
 }
 
 RTIBool 
-WeatherPlugin_copy_sample(
+SchedulePlugin_copy_sample(
     PRESTypePluginEndpointData,
-    Weather *dst,
-    const Weather *src)
+    Schedule *dst,
+    const Schedule *src)
 {
-    return WeatherPluginSupport_copy_data(dst,src);
+    return SchedulePluginSupport_copy_data(dst,src);
 }
 
 /* ----------------------------------------------------------------------------
 (De)Serialize functions:
 * ------------------------------------------------------------------------- */
 unsigned int 
-WeatherPlugin_get_serialized_sample_max_size(
+SchedulePlugin_get_serialized_sample_max_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment);
 
 RTIBool 
-WeatherPlugin_serialize(
+SchedulePlugin_serialize(
     PRESTypePluginEndpointData endpoint_data,
-    const Weather *sample, 
+    const Schedule *sample, 
     struct RTICdrStream *stream,    
     RTIBool serialize_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -259,22 +259,17 @@ WeatherPlugin_serialize(
         if(serialize_sample) {
 
             if (!rti::topic::cdr::serialize(
-                stream, &sample->temperature())) {
+                stream, &sample->scheduled())) {
                 return RTI_FALSE;
             }
 
             if (!rti::topic::cdr::serialize(
-                stream, &sample->tempTS())) {
+                stream, &sample->until())) {
                 return RTI_FALSE;
             }
 
             if (!rti::topic::cdr::serialize(
-                stream, &sample->pollution())) {
-                return RTI_FALSE;
-            }
-
-            if (!rti::topic::cdr::serialize(
-                stream, &sample->pollTS())) {
+                stream, &sample->sentTS())) {
                 return RTI_FALSE;
             }
 
@@ -292,9 +287,9 @@ WeatherPlugin_serialize(
 }
 
 RTIBool 
-WeatherPlugin_deserialize_sample(
+SchedulePlugin_deserialize_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample,
+    Schedule *sample,
     struct RTICdrStream *stream,   
     RTIBool deserialize_encapsulation,
     RTIBool deserialize_sample, 
@@ -318,22 +313,17 @@ WeatherPlugin_deserialize_sample(
 
         if (!rti::topic::cdr::deserialize(
             stream, 
-            &sample->temperature())) {
+            &sample->scheduled())) {
             goto fin; 
         }
         if (!rti::topic::cdr::deserialize(
             stream, 
-            &sample->tempTS())) {
+            &sample->until())) {
             goto fin; 
         }
         if (!rti::topic::cdr::deserialize(
             stream, 
-            &sample->pollution())) {
-            goto fin; 
-        }
-        if (!rti::topic::cdr::deserialize(
-            stream, 
-            &sample->pollTS())) {
+            &sample->sentTS())) {
             goto fin; 
         }
     }
@@ -353,10 +343,10 @@ WeatherPlugin_deserialize_sample(
 }
 
 RTIBool
-WeatherPlugin_serialize_to_cdr_buffer(
+SchedulePlugin_serialize_to_cdr_buffer(
     char * buffer,
     unsigned int * length,
-    const Weather *sample)
+    const Schedule *sample)
 {
     try{
         struct RTICdrStream stream;
@@ -368,12 +358,12 @@ WeatherPlugin_serialize_to_cdr_buffer(
         }
 
         epd._maxSizeSerializedSample =
-        WeatherPlugin_get_serialized_sample_max_size(
+        SchedulePlugin_get_serialized_sample_max_size(
             NULL, RTI_TRUE, RTICdrEncapsulation_getNativeCdrEncapsulationId(), 0);
 
         if (buffer == NULL) {
             *length = 
-            WeatherPlugin_get_serialized_sample_size(
+            SchedulePlugin_get_serialized_sample_size(
                 (PRESTypePluginEndpointData)&epd,
                 RTI_TRUE,
                 RTICdrEncapsulation_getNativeCdrEncapsulationId(),
@@ -390,7 +380,7 @@ WeatherPlugin_serialize_to_cdr_buffer(
         RTICdrStream_init(&stream);
         RTICdrStream_set(&stream, (char *)buffer, *length);
 
-        result = WeatherPlugin_serialize(
+        result = SchedulePlugin_serialize(
             (PRESTypePluginEndpointData)&epd, sample, &stream, 
             RTI_TRUE, RTICdrEncapsulation_getNativeCdrEncapsulationId(), 
             RTI_TRUE, NULL);  
@@ -403,8 +393,8 @@ WeatherPlugin_serialize_to_cdr_buffer(
 }
 
 RTIBool
-WeatherPlugin_deserialize_from_cdr_buffer(
-    Weather *sample,
+SchedulePlugin_deserialize_from_cdr_buffer(
+    Schedule *sample,
     const char * buffer,
     unsigned int length)
 {
@@ -414,16 +404,16 @@ WeatherPlugin_deserialize_from_cdr_buffer(
     RTICdrStream_set(&stream, (char *)buffer, length);
 
     rti::topic::reset_sample(*sample);
-    return WeatherPlugin_deserialize_sample( 
+    return SchedulePlugin_deserialize_sample( 
         NULL, sample,
         &stream, RTI_TRUE, RTI_TRUE, 
         NULL);
 }
 
 RTIBool 
-WeatherPlugin_deserialize(
+SchedulePlugin_deserialize(
     PRESTypePluginEndpointData endpoint_data,
-    Weather **sample,
+    Schedule **sample,
     RTIBool * drop_sample,
     struct RTICdrStream *stream,   
     RTIBool deserialize_encapsulation,
@@ -432,11 +422,11 @@ WeatherPlugin_deserialize(
 {
     try {
         RTIBool result;
-        const char *METHOD_NAME = "WeatherPlugin_deserialize";
+        const char *METHOD_NAME = "SchedulePlugin_deserialize";
         if (drop_sample) {} /* To avoid warnings */
 
         stream->_xTypesState.unassignable = RTI_FALSE;
-        result= WeatherPlugin_deserialize_sample( 
+        result= SchedulePlugin_deserialize_sample( 
             endpoint_data, (sample != NULL)?*sample:NULL,
             stream, deserialize_encapsulation, deserialize_sample, 
             endpoint_plugin_qos);
@@ -450,7 +440,7 @@ WeatherPlugin_deserialize(
             RTICdrLog_exception(
                 METHOD_NAME, 
                 &RTI_CDR_LOG_UNASSIGNABLE_SAMPLE_OF_TYPE_s, 
-                "Weather");
+                "Schedule");
 
         }
 
@@ -461,7 +451,7 @@ WeatherPlugin_deserialize(
     }
 }
 
-RTIBool WeatherPlugin_skip(
+RTIBool SchedulePlugin_skip(
     PRESTypePluginEndpointData endpoint_data,
     struct RTICdrStream *stream,   
     RTIBool skip_encapsulation,
@@ -486,13 +476,10 @@ RTIBool WeatherPlugin_skip(
 
     if (skip_sample) {
 
-        if (!RTICdrStream_skipDouble (stream)) {
+        if (!RTICdrStream_skipBoolean (stream)) {
             goto fin; 
         }
         if (!RTICdrStream_skipUnsignedLong (stream)) {
-            goto fin; 
-        }
-        if (!RTICdrStream_skipLong (stream)) {
             goto fin; 
         }
         if (!RTICdrStream_skipUnsignedLong (stream)) {
@@ -518,7 +505,7 @@ catch (...) {
 }
 
 unsigned int 
-WeatherPlugin_get_serialized_sample_max_size_ex(
+SchedulePlugin_get_serialized_sample_max_size_ex(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool * overflow,
     RTIBool include_encapsulation,
@@ -544,13 +531,10 @@ WeatherPlugin_get_serialized_sample_max_size_ex(
         initial_alignment = 0;
     }
 
-    current_alignment +=RTICdrType_getDoubleMaxSizeSerialized(
+    current_alignment +=RTICdrType_getBooleanMaxSizeSerialized(
         current_alignment);
 
     current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
-        current_alignment);
-
-    current_alignment +=RTICdrType_getLongMaxSizeSerialized(
         current_alignment);
 
     current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
@@ -563,7 +547,7 @@ WeatherPlugin_get_serialized_sample_max_size_ex(
 }
 
 unsigned int 
-WeatherPlugin_get_serialized_sample_max_size(
+SchedulePlugin_get_serialized_sample_max_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -573,7 +557,7 @@ WeatherPlugin_get_serialized_sample_max_size(
         unsigned int size;
         RTIBool overflow = RTI_FALSE;
 
-        size = WeatherPlugin_get_serialized_sample_max_size_ex(
+        size = SchedulePlugin_get_serialized_sample_max_size_ex(
             endpoint_data,&overflow,include_encapsulation,encapsulation_id,current_alignment);
 
         if (overflow) {
@@ -587,7 +571,7 @@ WeatherPlugin_get_serialized_sample_max_size(
 }
 
 unsigned int 
-WeatherPlugin_get_serialized_sample_min_size(
+SchedulePlugin_get_serialized_sample_min_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -612,11 +596,9 @@ WeatherPlugin_get_serialized_sample_min_size(
             initial_alignment = 0;
         }
 
-        current_alignment +=RTICdrType_getDoubleMaxSizeSerialized(
+        current_alignment +=RTICdrType_getBooleanMaxSizeSerialized(
             current_alignment);
         current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
-            current_alignment);
-        current_alignment +=RTICdrType_getLongMaxSizeSerialized(
             current_alignment);
         current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
             current_alignment);
@@ -637,12 +619,12 @@ WeatherPlugin_get_serialized_sample_min_size(
 * encapsulation flags.
 */
 unsigned int
-WeatherPlugin_get_serialized_sample_size(
+SchedulePlugin_get_serialized_sample_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment,
-    const Weather * sample) 
+    const Schedule * sample) 
 {
     try {  
         unsigned int initial_alignment = current_alignment;
@@ -674,15 +656,11 @@ WeatherPlugin_get_serialized_sample_size(
                 current_alignment);
         }
 
-        current_alignment += RTICdrType_getDoubleMaxSizeSerialized(
+        current_alignment += RTICdrType_getBooleanMaxSizeSerialized(
             PRESTypePluginDefaultEndpointData_getAlignment(
                 endpoint_data, current_alignment));
 
         current_alignment += RTICdrType_getUnsignedLongMaxSizeSerialized(
-            PRESTypePluginDefaultEndpointData_getAlignment(
-                endpoint_data, current_alignment));
-
-        current_alignment += RTICdrType_getLongMaxSizeSerialized(
             PRESTypePluginDefaultEndpointData_getAlignment(
                 endpoint_data, current_alignment));
 
@@ -704,15 +682,15 @@ Key Management functions:
 * -------------------------------------------------------------------------------------- */
 
 PRESTypePluginKeyKind 
-WeatherPlugin_get_key_kind(void)
+SchedulePlugin_get_key_kind(void)
 {
     return PRES_TYPEPLUGIN_NO_KEY;
 }
 
 RTIBool 
-WeatherPlugin_serialize_key(
+SchedulePlugin_serialize_key(
     PRESTypePluginEndpointData endpoint_data,
-    const Weather *sample, 
+    const Schedule *sample, 
     struct RTICdrStream *stream,    
     RTIBool serialize_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -732,7 +710,7 @@ WeatherPlugin_serialize_key(
 
         if(serialize_key) {
 
-            if (!WeatherPlugin_serialize(
+            if (!SchedulePlugin_serialize(
                 endpoint_data,
                 sample,
                 stream,
@@ -754,9 +732,9 @@ WeatherPlugin_serialize_key(
     }
 }
 
-RTIBool WeatherPlugin_deserialize_key_sample(
+RTIBool SchedulePlugin_deserialize_key_sample(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample, 
+    Schedule *sample, 
     struct RTICdrStream *stream,
     RTIBool deserialize_encapsulation,
     RTIBool deserialize_key,
@@ -778,7 +756,7 @@ RTIBool WeatherPlugin_deserialize_key_sample(
         }
         if (deserialize_key) {
 
-            if (!WeatherPlugin_deserialize_sample(
+            if (!SchedulePlugin_deserialize_sample(
                 endpoint_data, sample, stream, 
                 RTI_FALSE, RTI_TRUE, 
                 endpoint_plugin_qos)) {
@@ -796,9 +774,9 @@ RTIBool WeatherPlugin_deserialize_key_sample(
     }
 }
 
-RTIBool WeatherPlugin_deserialize_key(
+RTIBool SchedulePlugin_deserialize_key(
     PRESTypePluginEndpointData endpoint_data,
-    Weather **sample, 
+    Schedule **sample, 
     RTIBool * drop_sample,
     struct RTICdrStream *stream,
     RTIBool deserialize_encapsulation,
@@ -809,7 +787,7 @@ RTIBool WeatherPlugin_deserialize_key(
         RTIBool result;
         if (drop_sample) {} /* To avoid warnings */
         stream->_xTypesState.unassignable = RTI_FALSE;
-        result= WeatherPlugin_deserialize_key_sample(
+        result= SchedulePlugin_deserialize_key_sample(
             endpoint_data, (sample != NULL)?*sample:NULL, stream,
             deserialize_encapsulation, deserialize_key, endpoint_plugin_qos);
         if (result) {
@@ -825,7 +803,7 @@ RTIBool WeatherPlugin_deserialize_key(
 }
 
 unsigned int
-WeatherPlugin_get_serialized_key_max_size_ex(
+SchedulePlugin_get_serialized_key_max_size_ex(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool * overflow,
     RTIBool include_encapsulation,
@@ -851,7 +829,7 @@ WeatherPlugin_get_serialized_key_max_size_ex(
         initial_alignment = 0;
     }
 
-    current_alignment += WeatherPlugin_get_serialized_sample_max_size_ex(
+    current_alignment += SchedulePlugin_get_serialized_sample_max_size_ex(
         endpoint_data, overflow,RTI_FALSE, encapsulation_id, current_alignment);
 
     if (include_encapsulation) {
@@ -861,7 +839,7 @@ WeatherPlugin_get_serialized_key_max_size_ex(
 }
 
 unsigned int
-WeatherPlugin_get_serialized_key_max_size(
+SchedulePlugin_get_serialized_key_max_size(
     PRESTypePluginEndpointData endpoint_data,
     RTIBool include_encapsulation,
     RTIEncapsulationId encapsulation_id,
@@ -871,7 +849,7 @@ WeatherPlugin_get_serialized_key_max_size(
         unsigned int size;
         RTIBool overflow = RTI_FALSE;
 
-        size = WeatherPlugin_get_serialized_key_max_size_ex(
+        size = SchedulePlugin_get_serialized_key_max_size_ex(
             endpoint_data,&overflow,include_encapsulation,encapsulation_id,current_alignment);
 
         if (overflow) {
@@ -885,9 +863,9 @@ WeatherPlugin_get_serialized_key_max_size(
 }
 
 RTIBool 
-WeatherPlugin_serialized_sample_to_key(
+SchedulePlugin_serialized_sample_to_key(
     PRESTypePluginEndpointData endpoint_data,
-    Weather *sample,
+    Schedule *sample,
     struct RTICdrStream *stream, 
     RTIBool deserialize_encapsulation,  
     RTIBool deserialize_key, 
@@ -912,7 +890,7 @@ WeatherPlugin_serialized_sample_to_key(
 
     if (deserialize_key) {
 
-        if (!WeatherPlugin_deserialize_sample(
+        if (!SchedulePlugin_deserialize_sample(
             endpoint_data, sample, stream, RTI_FALSE, 
             RTI_TRUE, endpoint_plugin_qos)) {
             return RTI_FALSE;
@@ -944,7 +922,7 @@ WeatherPlugin_serialized_sample_to_key(
 /* ------------------------------------------------------------------------
 * Plug-in Installation Methods
 * ------------------------------------------------------------------------ */
-struct PRESTypePlugin *WeatherPlugin_new(void) 
+struct PRESTypePlugin *SchedulePlugin_new(void) 
 { 
     struct PRESTypePlugin *plugin = NULL;
     const struct PRESTypePluginVersion PLUGIN_VERSION = 
@@ -961,50 +939,50 @@ struct PRESTypePlugin *WeatherPlugin_new(void)
     /* set up parent's function pointers */
     plugin->onParticipantAttached =
     (PRESTypePluginOnParticipantAttachedCallback)
-    WeatherPlugin_on_participant_attached;
+    SchedulePlugin_on_participant_attached;
     plugin->onParticipantDetached =
     (PRESTypePluginOnParticipantDetachedCallback)
-    WeatherPlugin_on_participant_detached;
+    SchedulePlugin_on_participant_detached;
     plugin->onEndpointAttached =
     (PRESTypePluginOnEndpointAttachedCallback)
-    WeatherPlugin_on_endpoint_attached;
+    SchedulePlugin_on_endpoint_attached;
     plugin->onEndpointDetached =
     (PRESTypePluginOnEndpointDetachedCallback)
-    WeatherPlugin_on_endpoint_detached;
+    SchedulePlugin_on_endpoint_detached;
 
     plugin->copySampleFnc =
     (PRESTypePluginCopySampleFunction)
-    WeatherPlugin_copy_sample;
+    SchedulePlugin_copy_sample;
     plugin->createSampleFnc =
     (PRESTypePluginCreateSampleFunction)
-    WeatherPlugin_create_sample;
+    SchedulePlugin_create_sample;
     plugin->destroySampleFnc =
     (PRESTypePluginDestroySampleFunction)
-    WeatherPlugin_destroy_sample;
+    SchedulePlugin_destroy_sample;
 
     plugin->serializeFnc =
     (PRESTypePluginSerializeFunction)
-    WeatherPlugin_serialize;
+    SchedulePlugin_serialize;
     plugin->deserializeFnc =
     (PRESTypePluginDeserializeFunction)
-    WeatherPlugin_deserialize;
+    SchedulePlugin_deserialize;
     plugin->getSerializedSampleMaxSizeFnc =
     (PRESTypePluginGetSerializedSampleMaxSizeFunction)
-    WeatherPlugin_get_serialized_sample_max_size;
+    SchedulePlugin_get_serialized_sample_max_size;
     plugin->getSerializedSampleMinSizeFnc =
     (PRESTypePluginGetSerializedSampleMinSizeFunction)
-    WeatherPlugin_get_serialized_sample_min_size;
+    SchedulePlugin_get_serialized_sample_min_size;
 
     plugin->getSampleFnc =
     (PRESTypePluginGetSampleFunction)
-    WeatherPlugin_get_sample;
+    SchedulePlugin_get_sample;
     plugin->returnSampleFnc =
     (PRESTypePluginReturnSampleFunction)
-    WeatherPlugin_return_sample;
+    SchedulePlugin_return_sample;
 
     plugin->getKeyKindFnc =
     (PRESTypePluginGetKeyKindFunction)
-    WeatherPlugin_get_key_kind;
+    SchedulePlugin_get_key_kind;
 
     /* These functions are only used for keyed types. As this is not a keyed
     type they are all set to NULL
@@ -1020,29 +998,29 @@ struct PRESTypePlugin *WeatherPlugin_new(void)
     plugin->serializedSampleToKeyHashFnc = NULL;
     plugin->serializedKeyToKeyHashFnc = NULL;    
     plugin->typeCode = (struct RTICdrTypeCode *) 
-    &rti::topic::dynamic_type<Weather>::get().native();
+    &rti::topic::dynamic_type<Schedule>::get().native();
 
     plugin->languageKind = PRES_TYPEPLUGIN_CPPSTL_LANG;
 
     /* Serialized buffer */
     plugin->getBuffer = 
     (PRESTypePluginGetBufferFunction)
-    WeatherPlugin_get_buffer;
+    SchedulePlugin_get_buffer;
     plugin->returnBuffer = 
     (PRESTypePluginReturnBufferFunction)
-    WeatherPlugin_return_buffer;
+    SchedulePlugin_return_buffer;
     plugin->getSerializedSampleSizeFnc =
     (PRESTypePluginGetSerializedSampleSizeFunction)
-    WeatherPlugin_get_serialized_sample_size;
+    SchedulePlugin_get_serialized_sample_size;
 
-    static const char * TYPE_NAME = "Weather";
+    static const char * TYPE_NAME = "Schedule";
     plugin->endpointTypeName = TYPE_NAME;
 
     return plugin;
 }
 
 void
-WeatherPlugin_delete(struct PRESTypePlugin *plugin)
+SchedulePlugin_delete(struct PRESTypePlugin *plugin)
 {
     RTIOsapiHeap_freeStructure(plugin);
 } 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.1)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-set (CMAKE_CXX_FLAGS "--std=c++17 ${CMAKE_CXX_FLAGS} -DRTI_UNIX -DRTI_LINUX -DRTI_64BIT -DRTI_STATIC -DBOOST_LOG_DYN_LINK -Wall")
+set(CMAKE_CXX_FLAGS "--std=c++17 ${CMAKE_CXX_FLAGS} -DRTI_UNIX -DRTI_LINUX -DRTI_64BIT -DRTI_STATIC -DBOOST_LOG_DYN_LINK -Wall")
 
 set(DDSHOME "/home/kovi/bin/rti_connext_dds-5.3.0/")
 set(TARGET_ARCH "x64Linux3gcc5.4.0")
@@ -11,21 +11,38 @@ include_directories(SYSTEM ${DDSHOME}/include ${DDSHOME}/include/ndds ${DDSHOME}
 
 link_directories(${DDSHOME}lib/${TARGET_ARCH})
 
-# WEATHER
-include_directories(".")
+# DDS
 
+set(DDS_SOURCES DDS/AbstractPublisher.hpp DDS/AbstractSubscriber.hpp)
+
+
+# WEATHER
 set(WEATHER_COMMON_SOURCES DDS/Weather/common/Weather.cxx DDS/Weather/common/WeatherPlugin.cxx)
 set(WEATHER_COMMON_HEADERS DDS/Weather/common/Weather.hpp DDS/Weather/common/WeatherPlugin.hpp)
 
-set(WEATHER_PUB_SOURCES DDS/Weather/publisher/WeatherPublisher.cpp)
+set(WEATHER_PUB_SOURCES ${DDS_SOURCES} DDS/Weather/publisher/WeatherPublisher.cpp)
 set(WEATHER_PUB_HEADERS DDS/Weather/publisher/WeatherPublisher.hpp)
 
 set(WEATHER_SUB_SOURCES DDS/Weather/subscriber/WeatherSubscriber.cpp)
 set(WEATHER_SUB_HEADERS DDS/Weather/subscriber/WeatherSubscriber.hpp)
 
 set(WEATHER_ALL_SOURCES ${WEATHER_COMMON_SOURCES}
-                        ${WEATHER_PUB_SOURCES}
-                        ${WEATHER_SUB_SOURCES})
+        ${WEATHER_PUB_SOURCES}
+        ${WEATHER_SUB_SOURCES})
+
+# SCHEDULE
+set(SCHEDULE_COMMON_SOURCES DDS/Schedule/common/Schedule.cxx DDS/Schedule/common/SchedulePlugin.cxx)
+set(SCHEDULE_COMMON_HEADERS DDS/Schedule/common/Schedule.hpp DDS/Schedule/common/SchedulePlugin.hpp)
+
+set(SCHEDULE_PUB_SOURCES ${DDS_SOURCES} DDS/Schedule/publisher/SchedulePublisher.cpp)
+set(SCHEDULE_PUB_HEADERS DDS/Schedule/publisher/SchedulePublisher.hpp)
+
+set(SCHEDULE_SUB_SOURCES DDS/Schedule/subscriber/ScheduleSubscriber.cpp)
+set(SCHEDULE_SUB_HEADERS DDS/Schedule/subscriber/ScheduleSubscriber.hpp)
+
+set(SCHEDULE_ALL_SOURCES ${SCHEDULE_COMMON_SOURCES}
+        ${SCHEDULE_PUB_SOURCES}
+        ${SCHEDULE_SUB_SOURCES})
 
 # AzureWrapper
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
@@ -36,7 +53,7 @@ set(AZURE_WRAPPER_HEADERS "AzureWrapper/IoTHubClient.hpp")
 
 set(AZURE_WRAPPER_ALL_SOURCES ${AZURE_WRAPPER_SOURCES})
 
-find_package(Boost REQUIRED COMPONENTS date_time log log_setup )
+find_package(Boost REQUIRED COMPONENTS date_time log log_setup)
 
 include_directories(SYSTEM ${AZUREIOT_INC_FOLDER} ${RAPIDJSON_INC_FOLDER} ${Boost_INCLUDE_DIRS})
 
@@ -48,8 +65,12 @@ pkg_check_modules(CURLPP REQUIRED curlpp)
 # UTIL STUFF
 set(UTIL_SOURCES "Util/WeatherInformationService.cpp")
 
+# EDGE STUFF
+set(EDGE_SOURCES "Devices/HumidityEdge.cpp")
+
 # Final target
-add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} main.cpp)
+include_directories(".")
+add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} ${SCHEDULE_ALL_SOURCES} main.cpp)
 target_link_libraries(cps_main
         nddscpp2z
         nddscz

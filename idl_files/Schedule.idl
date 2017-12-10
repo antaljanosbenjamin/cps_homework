@@ -1,0 +1,5 @@
+struct Schedule {
+    boolean scheduled;
+    unsigned long until;
+    unsigned long sentTS;
+};
