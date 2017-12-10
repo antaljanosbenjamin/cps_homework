@@ -8,6 +8,7 @@
 #include <string>
 #include <dds/dds.hpp>
 #include <atomic>
+#include <thread>
 
 template<typename DataT>
 class AbstractSubscriber : public dds::sub::NoOpDataReaderListener<DataT> {
@@ -17,8 +18,9 @@ public:
             participant(domain_id),
             topic(participant, topic_name),
             reader(dds::sub::Subscriber(participant), topic),
-            pollSeconds(pollSeconds) {
-        reader.listener(this, dds::core::status::StatusMask::all());
+            pollSeconds(pollSeconds),
+            receiverThread(){
+        this->reader.listener(this, dds::core::status::StatusMask::none());
     }
 
     virtual ~AbstractSubscriber() {
@@ -35,13 +37,20 @@ public:
     }
 
     void startReceiving(std::function<void(const DataT& data)> consumerFunction) {
-        while (true) {
-            rti::util::sleep(dds::core::Duration::from_secs(pollSeconds.load()));
-        }
+        this->consumerFunction = consumerFunction;
+        this->reader.listener(this, dds::core::status::StatusMask::all());
+        this->receiverThread = std::thread([this](){
+            while (true) {
+                rti::util::sleep(dds::core::Duration::from_secs(this->pollSeconds.load()));
+            }
+        });
     }
 
     void stopReceiving() {
-        reader.listener(NULL, dds::core::status::StatusMask::none());
+        this->reader.listener(NULL, dds::core::status::StatusMask::none());
+        if (this->receiverThread.joinable()){
+            this->receiverThread.join();
+        }
     }
 
 private:
@@ -50,6 +59,7 @@ private:
     dds::sub::DataReader<DataT> reader;
     std::function<void(const DataT& data)> consumerFunction;
     std::atomic<int> pollSeconds;
+    std::thread receiverThread;
 };
 
 #endif //PROJECT_ABSTRACTSUBSCRIBER_HPP

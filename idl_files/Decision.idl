@@ -3,7 +3,7 @@
 #include <Schedule.idl>
 #include <UvegHaz.idl>
 
-enum Decision { OPEN, CLOSE };
+enum Decision { CLOSE, OPEN };
 
 struct DecisionInfo {
     unsigned long decisionTS;

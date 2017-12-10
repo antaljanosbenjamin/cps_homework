@@ -105,15 +105,18 @@ include(FindPkgConfig)
 pkg_check_modules(CURLPP REQUIRED curlpp)
 
 # UTIL STUFF
-set(UTIL_SOURCES "Util/WeatherInformationService.cpp")
+set(UTIL_SOURCES "Util/WeatherInformationService.cpp" "Util/DateHelper.cpp")
 
 # EDGE STUFF
 set(EDGE_SOURCES "Devices/HumidityEdge.cpp")
 
+# CONTROLLER STUFF
+set(CONTROLLER_SOURCES "Devices/HumidityController.cpp")
+
 # Final target
 include_directories(".")
 add_executable(cps_main ${WEATHER_ALL_SOURCES} ${AZURE_WRAPPER_ALL_SOURCES} ${UTIL_SOURCES} ${EDGE_SOURCES} 
-        ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} ${DECISION_ALL_SOURCES} ${HUMIDITY_ALL_SOURCES} main.cpp)
+        ${SCHEDULE_ALL_SOURCES} ${CONFIG_ALL_SOURCES} ${DECISION_ALL_SOURCES} ${HUMIDITY_ALL_SOURCES} ${CONTROLLER_SOURCES} main.cpp)
 target_link_libraries(cps_main
         nddscpp2z
         nddscz

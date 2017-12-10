@@ -109,10 +109,10 @@ or consult the RTI Connext manual.
 #endif
 struct Decision_def {
     enum type {
-        OPEN,      
-        CLOSE     
+        CLOSE,      
+        OPEN     
     };
-    static type get_default(){ return OPEN;}
+    static type get_default(){ return CLOSE;}
 };
 
 typedef dds::core::safe_enum<Decision_def> Decision;

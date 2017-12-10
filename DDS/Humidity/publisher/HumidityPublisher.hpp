@@ -14,7 +14,6 @@ public:
 
     ~HumidityPublisher();
 
-    void publish(bool scheduled, unsigned long until, unsigned long sentTS);
 };
 
 

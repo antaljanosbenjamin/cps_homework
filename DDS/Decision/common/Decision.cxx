@@ -23,11 +23,11 @@ std::ostream& operator << (std::ostream& o,const Decision& sample)
 {
     rti::util::StreamFlagSaver flag_saver (o);
     switch(sample.underlying()){
-        case Decision::OPEN:
-        o << "Decision::OPEN" << " ";
-        break;
         case Decision::CLOSE:
         o << "Decision::CLOSE" << " ";
+        break;
+        case Decision::OPEN:
+        o << "Decision::OPEN" << " ";
         break;
     }
     return o;
@@ -218,14 +218,14 @@ namespace rti {
                 {
 
                     {
-                        (char *)"OPEN",/* Member name */
+                        (char *)"CLOSE",/* Member name */
                         {
                             0, /* Ignored */          
                             DDS_BOOLEAN_FALSE,/* Is a pointer? */
                             -1, /* Bitfield bits */
                             NULL/* Member type code is assigned later */
                         },
-                        Decision::OPEN, 
+                        Decision::CLOSE, 
                         0, /* Ignored */
                         0, /* Ignored */
                         NULL, /* Ignored */
@@ -236,14 +236,14 @@ namespace rti {
                         NULL/* Ignored */
                     }, 
                     {
-                        (char *)"CLOSE",/* Member name */
+                        (char *)"OPEN",/* Member name */
                         {
                             0, /* Ignored */          
                             DDS_BOOLEAN_FALSE,/* Is a pointer? */
                             -1, /* Bitfield bits */
                             NULL/* Member type code is assigned later */
                         },
-                        Decision::CLOSE, 
+                        Decision::OPEN, 
                         0, /* Ignored */
                         0, /* Ignored */
                         NULL, /* Ignored */

@@ -22,14 +22,5 @@ HumidityPublisher() :
         AbstractPublisher(1,"DHT_Humidity") {
 }
 
-void HumidityPublisher::publish(bool scheduled, unsigned long until, unsigned long sentTS) {
-
-    // Create an instance
-    UvegHaz instance;
-
-    this->publishData(instance);
-
-}
-
 HumidityPublisher::~HumidityPublisher() {
 }

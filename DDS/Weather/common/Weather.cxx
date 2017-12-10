@@ -24,14 +24,14 @@ or consult the RTI Connext manual.
 Weather::Weather() :
     m_temperature_ (0.0) ,
     m_tempTS_ (0u) ,
-    m_pollution_ (0) ,
+    m_pollution_ (0u) ,
     m_pollTS_ (0u)  {
 }   
 
 Weather::Weather (
     double temperature,
     uint32_t tempTS,
-    int32_t pollution,
+    uint32_t pollution,
     uint32_t pollTS)
     :
         m_temperature_( temperature ),
@@ -113,15 +113,15 @@ void Weather::tempTS(uint32_t value) {
     m_tempTS_ = value;
 }
 
-int32_t& Weather::pollution() OMG_NOEXCEPT {
+uint32_t& Weather::pollution() OMG_NOEXCEPT {
     return m_pollution_;
 }
 
-const int32_t& Weather::pollution() const OMG_NOEXCEPT {
+const uint32_t& Weather::pollution() const OMG_NOEXCEPT {
     return m_pollution_;
 }
 
-void Weather::pollution(int32_t value) {
+void Weather::pollution(uint32_t value) {
     m_pollution_ = value;
 }
 
@@ -256,7 +256,7 @@ namespace rti {
 
                 Weather_g_tc_members[1]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulong;
 
-                Weather_g_tc_members[2]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_long;
+                Weather_g_tc_members[2]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulong;
 
                 Weather_g_tc_members[3]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_ulong;
 

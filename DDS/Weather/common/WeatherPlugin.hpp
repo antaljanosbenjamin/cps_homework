@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef WeatherPlugin_1793541647_h
-#define WeatherPlugin_1793541647_h
+#ifndef WeatherPlugin_1793541653_h
+#define WeatherPlugin_1793541653_h
 
 #include "Weather.hpp"
 
@@ -267,5 +267,5 @@ WeatherPlugin_delete(struct PRESTypePlugin *);
 #define NDDSUSERDllExport
 #endif
 
-#endif /* WeatherPlugin_1793541647_h */
+#endif /* WeatherPlugin_1793541653_h */
 

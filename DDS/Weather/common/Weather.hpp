@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef Weather_1793541647_hpp
-#define Weather_1793541647_hpp
+#ifndef Weather_1793541653_hpp
+#define Weather_1793541653_hpp
 
 #include <iosfwd>
 
@@ -62,7 +62,7 @@ class NDDSUSERDllExport Weather {
     Weather(
         double temperature,
         uint32_t tempTS,
-        int32_t pollution,
+        uint32_t pollution,
         uint32_t pollTS);
 
     #ifdef RTI_CXX11_RVALUE_REFERENCES
@@ -85,9 +85,9 @@ class NDDSUSERDllExport Weather {
     const uint32_t& tempTS() const OMG_NOEXCEPT;
     void tempTS(uint32_t value);
 
-    int32_t& pollution() OMG_NOEXCEPT; 
-    const int32_t& pollution() const OMG_NOEXCEPT;
-    void pollution(int32_t value);
+    uint32_t& pollution() OMG_NOEXCEPT; 
+    const uint32_t& pollution() const OMG_NOEXCEPT;
+    void pollution(uint32_t value);
 
     uint32_t& pollTS() OMG_NOEXCEPT; 
     const uint32_t& pollTS() const OMG_NOEXCEPT;
@@ -102,7 +102,7 @@ class NDDSUSERDllExport Weather {
 
     double m_temperature_;
     uint32_t m_tempTS_;
-    int32_t m_pollution_;
+    uint32_t m_pollution_;
     uint32_t m_pollTS_;
 
 };
@@ -178,5 +178,5 @@ namespace rti {
 #define NDDSUSERDllExport
 #endif
 
-#endif // Weather_1793541647_hpp
+#endif // Weather_1793541653_hpp
 

@@ -13,8 +13,6 @@ public:
     DecisionPublisher();
 
     ~DecisionPublisher();
-
-    void publish(bool scheduled, unsigned long until, unsigned long sentTS);
 };
 
 

@@ -22,17 +22,5 @@ DecisionPublisher() :
         AbstractPublisher(42,"decision_info") {
 }
 
-void DecisionPublisher::publish(bool scheduled, unsigned long until, unsigned long sentTS) {
-
-    // Create an instance
-    /*Decision instance;
-    instance.scheduled() = scheduled;
-    instance.until() = until;
-    instance.sentTS() = sentTS;
-
-    this->publishData(instance);*/
-
-}
-
 DecisionPublisher::~DecisionPublisher() {
 }

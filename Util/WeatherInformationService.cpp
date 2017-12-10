@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/c_local_time_adjustor.hpp>
 
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
@@ -43,7 +44,7 @@ WeatherInformationService::getWeatherInfo(float latitude, float longitude, size_
         throw WeatherInformationError(error.str());
     }
 
-    if( document["status"] != "success"){
+    if (document["status"] != "success") {
         std::stringstream error;
         error << "Getting weather info failed! " << stringWeatherInfo;
         throw WeatherInformationError(error.str());
@@ -54,9 +55,11 @@ WeatherInformationService::getWeatherInfo(float latitude, float longitude, size_
     int pollution = document["data"]["current"]["pollution"]["aqius"].GetInt();
     std::string pollTs = document["data"]["current"]["pollution"]["ts"].GetString();
 
-    parse_delimited_time<ptime>(pollTs.substr(0, pollTs.size() - 1), 'T');
-    return WeatherInfo{temperature, parse_delimited_time<ptime>(tempTs.substr(0, tempTs.size() - 1), 'T'), pollution,
-                       parse_delimited_time<ptime>(pollTs.substr(0, pollTs.size() - 1), 'T')};
+    ptime localTempTS = c_local_adjustor<ptime>::utc_to_local(
+            ptime(parse_delimited_time<ptime>(tempTs.substr(0, tempTs.size() - 1), 'T')));
+    ptime localPollTS = c_local_adjustor<ptime>::utc_to_local(
+            ptime(parse_delimited_time<ptime>(pollTs.substr(0, pollTs.size() - 1), 'T')));
+    return WeatherInfo{temperature, localTempTS, pollution, localPollTS};
 }
 
 std::string WeatherInformationService::getWeatherInfoAsString(float latitude, float longitude, size_t precision) {

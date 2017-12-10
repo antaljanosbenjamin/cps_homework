@@ -91,7 +91,7 @@ DecisionPlugin_serialize(
 
         if(serialize_sample) {
 
-            if (*sample != Decision::OPEN && *sample != Decision::CLOSE){
+            if (*sample != Decision::CLOSE && *sample != Decision::OPEN){
                 RTICdrLog_exception(
                     METHOD_NAME, 
                     &RTI_CDR_LOG_SERIALIZE_INVALID_ENUMERATOR_ds, 
@@ -148,11 +148,11 @@ DecisionPlugin_deserialize_sample(
             return RTI_FALSE;
         }
         switch (enum_tmp) {
-            case Decision::OPEN:
-            *sample=Decision::OPEN;
-            break;
             case Decision::CLOSE:
             *sample=Decision::CLOSE;
+            break;
+            case Decision::OPEN:
+            *sample=Decision::OPEN;
             break;
             default:
             {

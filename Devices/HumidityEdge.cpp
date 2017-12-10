@@ -85,17 +85,14 @@ void HumidityEdge::start() {
 
     this->iotClient->start();
     isRunning.store(true);
-
+    this->decisionSubscriber->startReceiving([&](const DecisionInfo &data) { this->archiveDecisionData(data); });
     this->readSchedule();
 
     this->workerThread = std::thread([this]() {
         size_t counter = 0;
         while (this->isRunning.load()) {
-            counter++;
-            std::this_thread::sleep_for(3s);
-            if (counter < 10){
-                continue;
-            }
+
+            std::this_thread::sleep_for(5s);
             counter = 0;
             try {
 
@@ -175,10 +172,10 @@ void HumidityEdge::archiveDecisionData(const DecisionInfo &data) {
 
     /// Humidity
     Document lastHumidityJSON;
-    const UvegHaz& lastHumidity = data.lastHumidity();
+    const UvegHaz &lastHumidity = data.lastHumidity();
     lastHumidityJSON.SetObject();
     std::string lastHumidityTimestamp = to_iso_extended_string(DateHelper::toPTime(lastHumidity.TimeStamp()));
-    auto & humidityAlloc = lastHumidityJSON.GetAllocator();
+    auto &humidityAlloc = lastHumidityJSON.GetAllocator();
     lastHumidityJSON.AddMember("humidity", Value(lastHumidity.Value()), humidityAlloc);
     lastHumidityJSON.AddMember("humidityTimestamp", Value(lastHumidityTimestamp.c_str(), humidityAlloc), humidityAlloc);
     messageToCloud.AddMember("lastHumidity", lastHumidityJSON, allocator);
@@ -197,6 +194,7 @@ void HumidityEdge::stop() {
     if (this->workerThread.joinable()) {
         this->workerThread.join();
     }
+    this->decisionSubscriber->stopReceiving();
     this->iotClient->stop();
     this->decisionSubscriber->stopReceiving();
 

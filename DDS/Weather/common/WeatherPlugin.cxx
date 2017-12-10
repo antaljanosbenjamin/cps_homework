@@ -492,7 +492,7 @@ RTIBool WeatherPlugin_skip(
         if (!RTICdrStream_skipUnsignedLong (stream)) {
             goto fin; 
         }
-        if (!RTICdrStream_skipLong (stream)) {
+        if (!RTICdrStream_skipUnsignedLong (stream)) {
             goto fin; 
         }
         if (!RTICdrStream_skipUnsignedLong (stream)) {
@@ -550,7 +550,7 @@ WeatherPlugin_get_serialized_sample_max_size_ex(
     current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
         current_alignment);
 
-    current_alignment +=RTICdrType_getLongMaxSizeSerialized(
+    current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
         current_alignment);
 
     current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
@@ -616,7 +616,7 @@ WeatherPlugin_get_serialized_sample_min_size(
             current_alignment);
         current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
             current_alignment);
-        current_alignment +=RTICdrType_getLongMaxSizeSerialized(
+        current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
             current_alignment);
         current_alignment +=RTICdrType_getUnsignedLongMaxSizeSerialized(
             current_alignment);
@@ -682,7 +682,7 @@ WeatherPlugin_get_serialized_sample_size(
             PRESTypePluginDefaultEndpointData_getAlignment(
                 endpoint_data, current_alignment));
 
-        current_alignment += RTICdrType_getLongMaxSizeSerialized(
+        current_alignment += RTICdrType_getUnsignedLongMaxSizeSerialized(
             PRESTypePluginDefaultEndpointData_getAlignment(
                 endpoint_data, current_alignment));
 
