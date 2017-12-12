@@ -27,7 +27,7 @@ HumidityController::HumidityController() :
         workerThread(),
         lastWeather(nullptr),
         lastSchedule(nullptr),
-        actualConfig(new Config(35, 25u, 50u, 70u)),
+        actualConfig(new Config(35, 25u, 45u, 55u)),
         lastHumidity(nullptr),
         lastDecision(),
         lastDecisionTS(second_clock::local_time()),
@@ -61,8 +61,10 @@ void HumidityController::start() {
         size_t counter = loopsToWork;
         while (this->isRunning.load()) {
             if (counter == loopsToWork) {
+                counter = 0;
                 this->makeDecision();
             }
+            counter++;
             std::this_thread::sleep_for(stopTime);
         }
     });
@@ -184,7 +186,6 @@ void HumidityController::makeDecision() {
     uint32_t minHum = this->actualConfig->minHumidity();
     if (!this->lastSchedule->scheduled()) {
         maxHum = maxHum * 100 / 90;
-        minHum = minHum * 90 / 100;
     }
 
     BOOST_LOG_TRIVIAL(debug) << "Making real decision...";
@@ -204,5 +205,6 @@ void HumidityController::makeDecision() {
     data.config() = *this->actualConfig;
     data.decision() = this->lastDecision;
     data.decisionTS() = DateHelper::toUnixTimestamp(this->lastDecisionTS);
+    std::this_thread::sleep_for(1.1s);
     this->decisionPublisher->publishData(data);
 }
