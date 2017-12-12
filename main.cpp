@@ -23,7 +23,6 @@ using namespace boost::posix_time;
 using namespace std::chrono_literals;
 
 Document getMessage(boost::posix_time::ptime time, double humidityValue) {
-
     std::string timestamp = to_iso_extended_string(time);
 
     Document message;
@@ -50,14 +49,16 @@ int main(int argc, const char **argv) {
                     << std::endl;
             return -1;
         }
-        HumidityEdge edge(argv[2], argv[3], argv[4]);
+        HumidityEdge edge(argv[2], argv[3], argv[4], 7*60);
         edge.start();
         // dds::domain::DomainParticipant::finalize_participant_factory();
         while (true) {
             std::string input;
             std::cin >> input;
             if (input == "stop") {
+                std::cout << "Stopping..." << std::endl;
                 edge.stop();
+                std::cout << "Stoped." << std::endl;
             } else if (input == "start") {
                 edge.start();
             } else if (input == "quit") {
@@ -73,7 +74,9 @@ int main(int argc, const char **argv) {
             std::string input;
             std::cin >> input;
             if (input == "stop") {
+                std::cout << "Stopping..." << std::endl;
                 controller.stop();
+                std::cout << "Stoped." << std::endl;
             } else if (input == "start") {
                 controller.start();
             } else if (input == "quit") {
@@ -97,7 +100,7 @@ int main(int argc, const char **argv) {
             data.Value() = humidityValue;
             data.TimeStamp() = DateHelper::toUnixTimestamp(second_clock::local_time());
             humPub.publishData(data);
-            std::this_thread::sleep_for(10s);
+            std::this_thread::sleep_for(4min);
         }
     }
 }

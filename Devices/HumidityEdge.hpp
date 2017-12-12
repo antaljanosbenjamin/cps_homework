@@ -7,6 +7,7 @@
 
 #include <string>
 #include <memory>
+#include <chrono>
 
 #include <rapidjson/document.h>
 
@@ -22,6 +23,7 @@ private:
     std::string weatherApiKey;
     std::string azureConnectionString;
     std::string scheduleFileName;
+    std::chrono::seconds workCycleLength;
 
     std::unique_ptr<WeatherInformationService> weatherService;
     std::unique_ptr<WeatherPublisher> weatherPublisher;
@@ -31,19 +33,20 @@ private:
     std::unique_ptr<IoTHubClient> iotClient;
     std::atomic<bool> isRunning;
     std::thread workerThread;
-    std::set<std::pair<boost::posix_time::ptime,boost::posix_time::ptime>> schedule;
+    std::set<std::pair<boost::posix_time::ptime, boost::posix_time::ptime>> schedule;
 
-
-    void receiveMessageFromCloud(const rapidjson::Document & message );
+    static std::chrono::seconds stopTime;
+    void receiveMessageFromCloud(const rapidjson::Document &message);
 
     rapidjson::Document getWeatherInfoJSON(const WeatherInformationService::WeatherInfo &weatherInfo);
 
     void readSchedule();
 
-    void archiveDecisionData(const DecisionInfo & data);
+    void archiveDecisionData(const DecisionInfo &data);
+
 public:
     HumidityEdge(const std::string &weatherApiKey, const std::string &azureConnectionString,
-                 const std::string &scheduleFileName);
+                 const std::string &scheduleFileName, size_t workCycleLength);
 
     void start();
 

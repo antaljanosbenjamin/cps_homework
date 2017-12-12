@@ -8,6 +8,7 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <chrono>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -42,6 +43,8 @@ private:
     boost::posix_time::ptime lastDecisionTS;
 
     std::mutex mutex;
+
+    static std::chrono::seconds stopTime;
 
     bool isAllDataAvailable();
     void receiveWeather(const Weather& weather);

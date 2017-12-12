@@ -15,6 +15,8 @@
 using namespace boost::posix_time;
 using namespace std::chrono_literals;
 
+std::chrono::seconds HumidityController::stopTime = 5s;
+
 HumidityController::HumidityController() :
         weatherSubscriber(new WeatherSubscriber()),
         scheduleSubscriber(new ScheduleSubscriber()),
@@ -25,10 +27,10 @@ HumidityController::HumidityController() :
         workerThread(),
         lastWeather(nullptr),
         lastSchedule(nullptr),
-        actualConfig(new Config(35, 25u, 40u, 60u)),
+        actualConfig(new Config(35, 25u, 50u, 70u)),
         lastHumidity(nullptr),
         lastDecision(),
-        lastDecisionTS(),
+        lastDecisionTS(second_clock::local_time()),
         mutex() {
 
 }
@@ -47,11 +49,22 @@ void HumidityController::start() {
     humiditySubscriber->startReceiving(std::bind(&HumidityController::receiveHumidity, this, _1));
 
     this->workerThread = std::thread([this]() {
-        while (this->isRunning.load()) {
-            this->makeDecision();
-            std::this_thread::sleep_for(5min);
-        }
 
+        long loopsToWorkToCast = 5min / stopTime;
+        size_t loopsToWork = 0;
+
+        if (loopsToWorkToCast > std::numeric_limits<size_t>::max()) {
+            loopsToWork = std::numeric_limits<size_t>::max();
+        } else if (loopsToWorkToCast > 0) {
+            loopsToWork = (size_t) loopsToWorkToCast;
+        }
+        size_t counter = loopsToWork;
+        while (this->isRunning.load()) {
+            if (counter == loopsToWork) {
+                this->makeDecision();
+            }
+            std::this_thread::sleep_for(stopTime);
+        }
     });
 }
 
@@ -80,7 +93,7 @@ bool HumidityController::isAllDataAvailable() {
     ptime lastPollTS = DateHelper::toPTime(lastWeather->pollTS());
     ts = to_iso_extended_string(lastPollTS);
     // it should newer, but the airvisual weather api provides new data only once an hour
-    if (now - lastTempTS > minutes(90) || now - lastPollTS > minutes(90k)) {
+    if (now - lastTempTS > minutes(1500) || now - lastPollTS > minutes(1500)) {
         return false;
     }
 

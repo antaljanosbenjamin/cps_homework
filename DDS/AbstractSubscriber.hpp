@@ -19,7 +19,8 @@ public:
             topic(participant, topic_name),
             reader(dds::sub::Subscriber(participant), topic),
             pollSeconds(pollSeconds),
-            receiverThread(){
+            receiverThread(),
+            isReceiving(false) {
         this->reader.listener(this, dds::core::status::StatusMask::none());
     }
 
@@ -36,11 +37,12 @@ public:
         }
     }
 
-    void startReceiving(std::function<void(const DataT& data)> consumerFunction) {
+    void startReceiving(std::function<void(const DataT &data)> consumerFunction) {
         this->consumerFunction = consumerFunction;
         this->reader.listener(this, dds::core::status::StatusMask::all());
-        this->receiverThread = std::thread([this](){
-            while (true) {
+        isReceiving.store(true);
+        this->receiverThread = std::thread([this]() {
+            while (this->isReceiving.load()) {
                 rti::util::sleep(dds::core::Duration::from_secs(this->pollSeconds.load()));
             }
         });
@@ -48,7 +50,8 @@ public:
 
     void stopReceiving() {
         this->reader.listener(NULL, dds::core::status::StatusMask::none());
-        if (this->receiverThread.joinable()){
+        isReceiving.store(false);
+        if (this->receiverThread.joinable()) {
             this->receiverThread.join();
         }
     }
@@ -57,9 +60,10 @@ private:
     dds::domain::DomainParticipant participant;
     dds::topic::Topic<DataT> topic;
     dds::sub::DataReader<DataT> reader;
-    std::function<void(const DataT& data)> consumerFunction;
+    std::function<void(const DataT &data)> consumerFunction;
     std::atomic<int> pollSeconds;
     std::thread receiverThread;
+    std::atomic<bool> isReceiving;
 };
 
 #endif //PROJECT_ABSTRACTSUBSCRIBER_HPP

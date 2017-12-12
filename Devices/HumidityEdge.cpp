@@ -14,11 +14,14 @@ using namespace rapidjson;
 using namespace std::chrono_literals;
 using namespace boost::posix_time;
 
+std::chrono::seconds HumidityEdge::stopTime = 5s;
+
 HumidityEdge::HumidityEdge(const std::string &weatherApiKey, const std::string &azureConnectionString,
-                           const std::string &scheduleFileName) :
+                           const std::string &scheduleFileName, size_t workCycleLength) :
         weatherApiKey(weatherApiKey),
         azureConnectionString(azureConnectionString),
         scheduleFileName(scheduleFileName),
+        workCycleLength(workCycleLength),
         weatherService(new WeatherInformationService(weatherApiKey)),
         weatherPublisher(new WeatherPublisher()),
         schedulePublisher(new SchedulePublisher()),
@@ -89,11 +92,24 @@ void HumidityEdge::start() {
     this->readSchedule();
 
     this->workerThread = std::thread([this]() {
-        size_t counter = 0;
+        long loopsToWorkToCast = this->workCycleLength / stopTime;
+        size_t loopsToWork = 0;
+
+        if (loopsToWorkToCast > std::numeric_limits<size_t>::max()) {
+            loopsToWork = std::numeric_limits<size_t>::max();
+        } else if (loopsToWorkToCast > 0) {
+            loopsToWork = (size_t) loopsToWorkToCast;
+        }
+
+        size_t counter = loopsToWork;
         while (this->isRunning.load()) {
 
-            std::this_thread::sleep_for(5s);
-            counter = 0;
+            if (counter < loopsToWork) {
+                counter++;
+                std::this_thread::sleep_for(stopTime);
+                continue;
+            }
+            counter = 1;
             try {
 
                 WeatherInformationService::WeatherInfo weatherInfo = this->weatherService->getWeatherInfo(47.4985f,
@@ -109,6 +125,8 @@ void HumidityEdge::start() {
                 BOOST_LOG_TRIVIAL(error) << wis.what();
             }
 
+            std::this_thread::sleep_for(stopTime);
+            BOOST_LOG_TRIVIAL(debug) << "Sending schedule...";
             ptime now = second_clock::local_time();
             while (this->schedule.size() != 0 && this->schedule.begin()->second < now) {
                 this->schedule.erase(this->schedule.begin());
@@ -124,6 +142,7 @@ void HumidityEdge::start() {
                                                      DateHelper::toUnixTimestamp(now));
                 }
             }
+            std::this_thread::sleep_for(stopTime);
         }
     });
 }
@@ -183,8 +202,9 @@ void HumidityEdge::archiveDecisionData(const DecisionInfo &data) {
     /// Global
     std::string decisionTimestamp = to_iso_extended_string(DateHelper::toPTime(data.decisionTS()));
     std::string decision = data.decision() == Decision::OPEN ? "OPEN" : "CLOSED";
-    messageToCloud.AddMember("decisionTimestamp", Value(sentTS.c_str(), allocator), allocator);
+    messageToCloud.AddMember("decisionTimestamp", Value(decisionTimestamp.c_str(), allocator), allocator);
     messageToCloud.AddMember("decision", Value(decision.c_str(), allocator), allocator);
+    messageToCloud.AddMember("type", Value("decision_history", allocator), allocator);
 
     this->iotClient->sendMessage(messageToCloud);
 }
