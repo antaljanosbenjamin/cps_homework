@@ -2,6 +2,7 @@
 // Created by kovi on 12/6/17.
 //
 
+#include "AzureWrapper/IoTHubClient.hpp"
 
 #include <thread>
 
@@ -14,14 +15,13 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "iothub_client.h"
-#include "iothub_client_options.h"
-#include "iothub_message.h"
-#include "iothubtransportamqp.h"
+#include "azureiot/iothub_client.h"
+#include "azureiot/iothub_client_options.h"
+#include "azureiot/iothub_message.h"
+#include "azureiot/iothubtransportamqp.h"
 
 #include <rapidjson/prettywriter.h> // for stringify JSON
 
-#include "AzureWrapper/IoTHubClient.hpp"
 
 
 using namespace std::chrono_literals;
@@ -94,7 +94,7 @@ IoTHubClient::IoTHubClient(const std::string &connectionString,
     this->clientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString.c_str(), AMQP_Protocol);
     if (this->clientHandle != nullptr) {
         IHC(SetOption)(clientHandle, OPTION_LOG_TRACE, &this->trace);
-        IHC(SetOption)(clientHandle, OPTION_C2D_KEEP_ALIVE_FREQ_SECS, &this->keepAlive);
+        IHC(SetOption)(clientHandle, OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &this->keepAlive);
 
         if (IHC(SetMessageCallback)(this->clientHandle, receiveMessage, this) !=
             IOTHUB_CLIENT_OK) {

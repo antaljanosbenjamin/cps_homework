@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.5.1)
+# This file is based on the following files/articles:
+# https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/ubuntu_apt-get_sample_setup.md
+# https://github.com/Tencent/rapidjson/
+# Example make file of RTI Connext DDS rti_workspace/5.3.0/examples/connext_dds/c++11/hello_idl/make/makefile_Hello_x64Linux3gcc5.4.0
+# and of course a lot of stackoverflow answer
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 set(CMAKE_CXX_FLAGS "--std=c++17 ${CMAKE_CXX_FLAGS} -DRTI_UNIX -DRTI_LINUX -DRTI_64BIT -DRTI_STATIC -DBOOST_LOG_DYN_LINK -Wall")
 
+# DDS
 set(DDSHOME "/home/kovi/bin/rti_connext_dds-5.3.0/")
 set(TARGET_ARCH "x64Linux3gcc5.4.0")
 
@@ -11,10 +17,7 @@ include_directories(SYSTEM ${DDSHOME}/include ${DDSHOME}/include/ndds ${DDSHOME}
 
 link_directories(${DDSHOME}lib/${TARGET_ARCH})
 
-# DDS
-
 set(DDS_SOURCES DDS/AbstractPublisher.hpp DDS/AbstractSubscriber.hpp)
-
 
 # WEATHER
 set(WEATHER_COMMON_SOURCES DDS/Weather/common/Weather.cxx DDS/Weather/common/WeatherPlugin.cxx)
@@ -63,7 +66,7 @@ set(DECISION_COMMON_SOURCES DDS/Decision/common/Decision.cxx DDS/Decision/common
 set(DECISION_COMMON_HEADERS DDS/Decision/common/Decision.hpp DDS/Decision/common/DecisionPlugin.hpp)
 
 set(DECISION_PUB_SOURCES ${DDS_SOURCES} DDS/Decision/publisher/DecisionPublisher.cpp)
-set(DECISION_PUB_HEADERS DDS/Decision/publisher/DecisionPublisher.hpp)
+set(DECISION_PUB_HEADERS DDS/Decision/publisher/DecisionPubDownload and install lisher.hpp)
 
 set(DECISION_SUB_SOURCES DDS/Decision/subscriber/DecisionSubscriber.cpp)
 set(DECISION_SUB_HEADERS DDS/Decision/subscriber/DecisionSubscriber.hpp)
@@ -88,7 +91,7 @@ set(HUMIDITY_ALL_SOURCES ${HUMIDITY_COMMON_SOURCES}
 
 # AzureWrapper
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
-set(RAPIDJSON_INC_FOLDER "/home/kovi/Repos/rapidjson/include")
+find_package(RapidJSON)
 
 set(AZURE_WRAPPER_SOURCES "AzureWrapper/IoTHubClient.cpp")
 set(AZURE_WRAPPER_HEADERS "AzureWrapper/IoTHubClient.hpp")
@@ -99,8 +102,7 @@ find_package(Boost REQUIRED COMPONENTS date_time log log_setup)
 
 include_directories(SYSTEM ${AZUREIOT_INC_FOLDER} ${RAPIDJSON_INC_FOLDER})
 
-# CURLPP https://github.com/jpbarrette/curlpp
-# after install run cp /usr/local/lib/libcurlpp.* /usr/lib/
+# CURLPP
 include(FindPkgConfig)
 pkg_check_modules(CURLPP REQUIRED curlpp)
 
@@ -132,6 +134,7 @@ target_link_libraries(cps_main
         uamqp
         pthread
         curl
+        curlpp
         ssl
         crypto
         m
