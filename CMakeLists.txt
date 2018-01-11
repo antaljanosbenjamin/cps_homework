@@ -10,12 +10,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "--std=c++17 ${CMAKE_CXX_FLAGS} -DRTI_UNIX -DRTI_LINUX -DRTI_64BIT -DRTI_STATIC -DBOOST_LOG_DYN_LINK -Wall")
 
 # DDS
-set(DDSHOME "/home/kovi/bin/rti_connext_dds-5.3.0/")
+set(DDSHOME $ENV{NDDSHOME})
 set(TARGET_ARCH "x64Linux3gcc5.4.0")
 
 include_directories(SYSTEM ${DDSHOME}/include ${DDSHOME}/include/ndds ${DDSHOME}/include/ndds/hpp)
 
-link_directories(${DDSHOME}lib/${TARGET_ARCH})
+link_directories(${DDSHOME}/lib/${TARGET_ARCH})
 
 set(DDS_SOURCES DDS/AbstractPublisher.hpp DDS/AbstractSubscriber.hpp)
 
