@@ -71,6 +71,10 @@ set(DECISION_PUB_HEADERS DDS/Decision/publisher/DecisionPubDownload and install 
 set(DECISION_SUB_SOURCES DDS/Decision/subscriber/DecisionSubscriber.cpp)
 set(DECISION_SUB_HEADERS DDS/Decision/subscriber/DecisionSubscriber.hpp)
 
+# fix for includes in DDS/Decision/common/Decision.hpp
+set(DECISION_ADDITIONAL_INCLUDE_DIRS DDS/Config/common DDS/Schedule/common DDS/Humidity/common DDS/Weather/common)
+include_directories(${DECISION_ADDITIONAL_INCLUDE_DIRS})
+
 set(DECISION_ALL_SOURCES ${DECISION_COMMON_SOURCES}
         ${DECISION_PUB_SOURCES}
         ${DECISION_SUB_SOURCES})
