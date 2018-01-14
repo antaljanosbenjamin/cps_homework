@@ -94,7 +94,7 @@ set(HUMIDITY_ALL_SOURCES ${HUMIDITY_COMMON_SOURCES}
         ${HUMIDITY_SUB_SOURCES})
 
 # AzureWrapper
-set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+set(AZUREIOT_INC_FOLDER ".." "/usr/local/include/azureiot" "/usr/local/include/azureiot/inc")
 find_package(RapidJSON)
 
 set(AZURE_WRAPPER_SOURCES "AzureWrapper/IoTHubClient.cpp")
