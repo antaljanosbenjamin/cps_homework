@@ -18,9 +18,25 @@ basicstyle=\ttfamily,
 columns=flexible,
 breaklines=true
 }
+\usepackage{color}
+
+\definecolor{mygray}{rgb}{0.4,0.4,0.4}
+\definecolor{mygreen}{rgb}{0,0.0,0.6}
+\definecolor{myorange}{rgb}{1.0,0.4,0}
+
+\lstset{
+commentstyle=\color{mygray},
+frame=none,
+numbersep=5pt,
+numberstyle=\tiny\color{mygray},
+keywordstyle=\color{mygreen},
+showspaces=false,
+showstringspaces=false,
+stringstyle=\color{myorange},
+tabsize=2
+}
 
 \usepackage{verbatim}
-
 
 \usepackage[hidelinks]{hyperref}
 \hypersetup{
@@ -36,11 +52,12 @@ breaklines=true
 
 \usepackage{graphicx}
 
-\author{Janos Benjamin Antal}
+\author{Janos Benjamin Antal\\\href{mailto:antal.janos.benjamin@gmail.com}{antal.janos.benjamin@gmail.com}}
 \title{CPS Humidity Homework}
 \begin{document}
 \maketitle
 \section{Prerequisites}
+
 To build the application on Linux Mint 18.3 the following steps are needed:
 
 \begin{itemize}
@@ -70,18 +87,6 @@ $ cd curlpp
 $ cmake .
 $ sudo make install
 \end{verbatim} 
-%\item Install \href{http://rapidjson.org/}{RapidJSON} with the steps described \href{https://github.com/Tencent/rapidjson}{here}. Unfortunately, RapidJSON can be compiled with GNU C++ compiler 5.4.0 because of a strange warning is interpreted as error. I already created an issue about it in github. Until this going to be fixed, just remove \verb!-Weffc++! from \verb+CMakeList.txt+. 
-%\begin{verbatim}
-%$ mkdir rapidjsonbuild
-%$ cd rapidjsonbuild
-%$ git clone https://github.com/Tencent/rapidjson.git
-%$ cd rapidjson
-%$ git submodule update --init
-%$ mkdir build
-%$ cd build
-%$ cmake ..
-%$ sudo make install
-%\end{verbatim} 
 \item Install AzureIoT C SDKfrom \href{https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md}{source}. After building the SDK use \verb+sudo make install+ to copy the header and the lib files to the system include path.
 \item Download and install \href{https://www.rti.com/gettingstarted/installlinux_secure}{RTI Connext DDS 5.3}
 \item Set the \verb+NDDSHOME+ environment variable to the root of RTI Connext DDS, e.g.: \verb+/opt/rti_connext_dds-5.3.0+
@@ -117,6 +122,7 @@ $ make [-j 8]
 \begin{verbatim}
 $ ./cps_main h <humidityDataFilePath>
 \end{verbatim}
+
 As result of this command the application will read the data file and start to publish a humidity value every 4 minutes. The file shall contains a humidity value per line. Each humidity value is a decimal number. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/humidity.txt}{file}.
 \item Start IoTEdge 
 \begin{lstlisting}
@@ -128,11 +134,13 @@ The meaning of parameteres are the following:
 \item \verb+azureConnectionString+: the connection string of the device used Azure IoT Hub
 \item \verb+scheduleFilePath+: path to a CSV file which stores the schedules time intervals. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/schedule.csv}{file}.
 \end{itemize}
+
 The IoTEdge module is responsible for comunication with Azure IoT Hub, the weather information system and also to send schedule information through DDS topic.
 \item Start humidity controller
 \begin{verbatim}
 $ ./cps_main c
 \end{verbatim}
+
 The controller receives the required informations and sensor values and also make decisions based on the collected data. It also sends the decision input and output to the IoTEdge in order to store them in the cloud.
 \end{enumerate}
 \section{System architecture}
@@ -189,6 +197,7 @@ struct DecisionInfo {
     UvegHaz lastHumidity;
 };
 \end{verbatim}
+
 The most complex part of the IoTEdge module is the IoTHub Client. It is responsible for translating and communicating between the IoTEdge and AzureIoT Hub. It sends the received sensor, weather and decision data to the cloud, and also receives config message from it. A config message contains the maximum outside temperature, the maximum outside pollution and the desired minimum and maximum temperature in the classroom. For example:
 \begin{verbatim}
 {
@@ -203,5 +212,74 @@ The most complex part of the IoTEdge module is the IoTHub Client. It is responsi
 \item maximumPollution:  a pollution value in Air Quality Index. If the outside pollution reaches this limit, the controller logic mustn't decide to open the window.
 \item minimumHumidity, maximumHumidity: the desired range of humidity expressed as relative humidity. The goal of the system it to keep humidity within this range.
 \end{itemize}
+\subsubsection{IoTHub Client}
 
+The IoTHub Client is a reusable part of the implementation. It's public interface are really simple:
+
+\begin{lstlisting}[language=C++]{Name=test2}
+class IoTHubClient final {
+public:
+
+    IoTHubClient(const std::string &connectionString,
+                 std::function<void(const rapidjson::Document &)> receivedMessageConsumer, 
+                 bool trace = false,
+                 uint32_t keepAlive = 240);
+
+    ~IoTHubClient();
+
+    void start();
+
+    void stop();
+
+    void sendMessage(const rapidjson::Document &message);
+};
+\end{lstlisting}
+
+The implementation is based on an official Azure IoT C SDK \href{https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c}{example}. Usage of the module also really simple. The constructor takes an Azure IoT Hub decive connection string, a message consumer function and two other parameters. More information about the last two parameters can be found in the referenced example. To start receiving/sending messages with an existing instance of IoTHubClient, the \verb+start()+ function has to be called. After the calling, the instance starts to receive messages from IoT Hub and also sends messages to it when \verb+sendMessage(msg)+ is called.
+
+\subsubsection{Abstract DDS classes}
+
+All of the \verb+XXXPublisher+ and the \verb+XXXSubscriber+ in this project is derived from \verb+AbstractPublisher+ and \verb+AbstractSubscriber+. They are generic template classes in order to make easy to create DDS publishers and subscribers. The interface of \verb+AbstractPublisher+ is the following:
+\begin{lstlisting}[language=C++]{Name=test2}
+template<typename DataT>
+class AbstractPublisher {
+public:
+    AbstractPublisher(int domain_id,
+                      const std::string &topic_name);
+
+    virtual ~AbstractPublisher();
+
+    void publishData(const DataT &data);
+};
+\end{lstlisting}
+The \verb+DataT+ template parameter should be DDS generated message's type. The \verb+publishData(data)+ function can be used to send a message to the given topic.
+
+The \verb+AbstractSubscriber+'s interface is very similar:
+\begin{lstlisting}[language=C++]{Name=test2}
+template<typename DataT>
+class AbstractSubscriber : public dds::sub::NoOpDataReaderListener<DataT> {
+public:
+
+    AbstractSubscriber(int domain_id, 
+                       const std::string &topic_name, 
+                       int pollSeconds);
+
+    virtual ~AbstractSubscriber();
+
+    void on_data_available(dds::sub::DataReader<DataT> &reader) override ;
+
+    void startReceiving(std::function<void(const DataT &data)> consumerFunction);
+
+    void stopReceiving();
+};
+\end{lstlisting}
+
+The \verb+on_data_available(dds::sub::DataReader<DataT> &reader)+ inherited from the base class, and shouldn't be called by the user. To start receiving messages the \verb+startReceiving(consumerFunction)+ function has to be called. After that, the subscriber will call the \verb+consumberFunction+ when a new message arrives.
+\subsection{Controller}
+The Controller receives the DDS messages with the required informations (scheduling, weather information, measured sensor values and configuration messsages), and makes decision based on them. Figure \ref{fig:decision_logic} shows the exact process of decision making. Decision making runs periodically in each 5 minutes, and decision is also made on receiving every input messages. It's important to make decision independently to message receiving, because the last known informations can be outdated. In case of any information is outdated, the decision output must be \verb+CLOSED+ in order to avoid opened window under not safe circumstances.
+\begin{figure}[!htb]
+  \includegraphics[width=250px]{imgs/decision_logic.png}
+  \caption{Flow diagram of decision logic}
+  \label{fig:decision_logic}
+\end{figure} 
 \end{document}
