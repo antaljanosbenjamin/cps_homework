@@ -128,7 +128,7 @@ The meaning of parameteres are the following:
 \item \verb+azureConnectionString+: the connection string of the device used Azure IoT Hub
 \item \verb+scheduleFilePath+: path to a CSV file which stores the schedules time intervals. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/schedule.csv}{file}.
 \end{itemize}
-The IoTEdge module is responsible to communicate with Azure IoT Hub, the weather information system and also to send schedule information through DDS topic.
+The IoTEdge module is responsible for comunication with Azure IoT Hub, the weather information system and also to send schedule information through DDS topic.
 \item Start humidity controller
 \begin{verbatim}
 $ ./cps_main c
@@ -150,6 +150,58 @@ The publisher module exists only for testing purposes, so this documentation doe
   \label{fig:arc_edge}
 \end{figure}
 
-Figure \ref{fig:arc_edge} shows the semantic architecture of IoT Edge. 
+As the figure \ref{fig:arc_edge} shows, the IoTEdge translates the messages received from the cloud and the weather forecast API to DDS messages and vica versa. The DDS Interface Description Language exactly describe the contents of the used DDS messages:
+\begin{verbatim}
+struct Config {
+    double maxTemperature;
+    unsigned long maxPollution;
+    unsigned long minHumidity;
+    unsigned long maxHumidity;
+};
+
+struct Schedule {
+    boolean scheduled;
+    unsigned long until;
+    unsigned long sentTS;
+};
+
+struct UvegHaz{
+    string ID; //@key
+    double Value;
+    long TimeStamp;
+};
+
+struct Weather {
+    double  temperature;
+    unsigned long tempTS;
+    unsigned long pollution;
+    unsigned long pollTS;
+};
+
+enum Decision { CLOSE, OPEN };
+
+struct DecisionInfo {
+    unsigned long decisionTS;
+    Decision decision;
+    Config config;
+    Weather lastWeather;
+    Schedule lastSchedule;
+    UvegHaz lastHumidity;
+};
+\end{verbatim}
+The most complex part of the IoTEdge module is the IoTHub Client. It is responsible for translating and communicating between the IoTEdge and AzureIoT Hub. It sends the received sensor, weather and decision data to the cloud, and also receives config message from it. A config message contains the maximum outside temperature, the maximum outside pollution and the desired minimum and maximum temperature in the classroom. For example:
+\begin{verbatim}
+{
+    "maximumTemperature" : 50,
+    "maximumPollution" : 55,
+    "minimumHumidity" : 42,
+    "maximumHumidity" : 46
+}
+\end{verbatim}
+\begin{itemize}
+\item maximumTemperature: a temperature value in Celsius. If the outside temperature reaches this limit, the controller logic mustn't decide to open the window.
+\item maximumPollution:  a pollution value in Air Quality Index. If the outside pollution reaches this limit, the controller logic mustn't decide to open the window.
+\item minimumHumidity, maximumHumidity: the desired range of humidity expressed as relative humidity. The goal of the system it to keep humidity within this range.
+\end{itemize}
 
 \end{document}

@@ -1,5 +1,5 @@
 struct UvegHaz{
-	string ID; //@key
-	double Value;
-	long TimeStamp;
+    string ID; //@key
+    double Value;
+    long TimeStamp;
 };
