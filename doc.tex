@@ -56,6 +56,95 @@ tabsize=2
 \title{CPS Humidity Homework}
 \begin{document}
 \maketitle
+\section{Homework description}
+The task in this homework is to design and develop one subsystem of an imaginary "smart" university control system. The subsystem's goal is to help keep the humidity of a classroom in the desired range. The subsystem has to interferes with the control system based on information gathered from the sensors in a classroom and some online services. The subsystem must contains at least a local and an online module communicating each other. Furthermore, the subsystem should grant a minimal level of assurance The subsystem should store the gathered information and controlling decision in the cloud for further alanysis.
+\begin{itemize}
+\item \textbf{Sensors}: a humidity sensor inside the classroom
+\item \textbf{Interferer}: a LED on the teacher's desk to indicate the opening/closing of the window: the window should be opened when the LED turns on, and should be closed when the LED turns off
+\item \textbf{Services}: a weather forecast and a schedule information provider service
+\item \textbf{Assurance}: in case of the weather is too hot or the air too polluted the subsystem shouldn't indicate the opening of window. When the classroom is not scheduled, the maximum of humidity should be bigger than it's scheduled.
+\end{itemize}
+\section{Requirements} The requirements above are really high level requirements, and in a real situation they should be refined to low level specifications. The requirements are specified as sentences and also most of them as Gherkin test cases: \\
+\begin{itemize}
+
+\item \textit{Turn on the only when the outer conditions are right and the humidity reach the upper bound:}
+\begin{verbatim}
+Given the system with right humidity value in the classroom
+And the LED is turned on
+And the temperature is not too high
+And the air pollution level is not too high
+When the humidity reaches the upper bound
+Then after the next refresh the LED turns on
+\end{verbatim}
+\item \textit{Turn off the LED when humidity reaches the lower bound:}
+\begin{verbatim}
+Given the system with humidity value above the upper boundary
+And the LED is turned on
+And the temperature is not too high
+And the air pollution level is not too high
+When the humidity reaches the lower bound
+Then after the next refresh the LED turns off
+\end{verbatim}
+\item \textit{Turn off the LED when the temperature becomes too high:}
+\begin{verbatim}
+Given the system with humidity value above the upper boundary
+And the LED is turned on
+And the temperature is not too high
+And the air pollution level is not too high
+When the temperature becomes too high
+Then after the next refresh the LED turns off
+\end{verbatim}
+\item \textit{Turn off the LED when the air pollution becomes too high:}
+\begin{verbatim}
+Given the system with humidity value above the upper boundary
+And the LED is turned on
+And the temperature is not too high
+And the air pollution level is not too high
+When the air pollution becomes too high
+Then after the next refresh the LED turns off
+\end{verbatim}
+\item \textit{Never turn on the LED when the air pollution level is too high:}
+\begin{verbatim}
+Given the system with right humidity value in the classroom
+And the LED is turned off
+And the air pollution is too high
+When the humidity raise above the upper boundary
+Then after the next refresh the LED is still turned off
+\end{verbatim}
+\item \textit{Never turn on the LED when the outer temperature is too high:}
+\begin{verbatim}
+Given the system with right humidity value in the classroom
+And the LED is turned off
+And the temperature is too high
+When the humidity raise above the upper boundary
+Then after the next refresh the LED is still turned off
+\end{verbatim}
+\item \textit{The subsystem must communicate with sensors placed in the classroom:}
+\begin{verbatim}
+Given the system with three fully operational sensor
+And the system can get humidity value from each sensor
+\end{verbatim}
+\textit{The subsystem can turn on the LED:}
+\begin{verbatim}
+Given the system with right humidity value in the classroom
+And the LED is turned off
+When the humidity reaches the upper bound
+Then after the next refresh the LED turns on
+\end{verbatim}
+\item \textit{Use encryption and certification in communication with cloud:}
+\begin{verbatim}
+Given the system
+When the system sends status information to the cloud
+Then the cloud server proofs that its the right server
+And the message is encrypted
+\end{verbatim}
+\item \textit{After the decision made, the actual status must be saved to the cloud.}\\
+\item \textit{Parameters (humidity boundaries, maximum air pollution level and maximum temperature) can be configurated remotely.}
+\item \textit{The subsystem must communicate with weather forecast system.}
+\item \textit{The subsystem must communicate with schedule information provider.}
+\item \textit{The subsystem must communicate with external systems by "best practice" protocols.}
+\item \textit{The subsystem must take into consideration the unavailability of external data sources when deciding on turning on/off the LED.}
+\end{itemize}
 \section{Prerequisites}
 
 To build the application on Linux Mint 18.3 the following steps are needed:
@@ -91,6 +180,8 @@ $ sudo make install
 \item Download and install \href{https://www.rti.com/gettingstarted/installlinux_secure}{RTI Connext DDS 5.3}
 \item Set the \verb+NDDSHOME+ environment variable to the root of RTI Connext DDS, e.g.: \verb+/opt/rti_connext_dds-5.3.0+
 \end{itemize}
+
+\section{Build}
 
 \section{Build}
 \begin{enumerate}
@@ -143,7 +234,7 @@ $ ./cps_main c
 
 The controller receives the required informations and sensor values and also make decisions based on the collected data. It also sends the decision input and output to the IoTEdge in order to store them in the cloud.
 \end{enumerate}
-\section{System architecture}
+\section{Implementation}
 The system consists three modules:
 \begin{itemize}
 \item IoTEdge
@@ -275,6 +366,7 @@ public:
 \end{lstlisting}
 
 The \verb+on_data_available(dds::sub::DataReader<DataT> &reader)+ inherited from the base class, and shouldn't be called by the user. To start receiving messages the \verb+startReceiving(consumerFunction)+ function has to be called. After that, the subscriber will call the \verb+consumberFunction+ when a new message arrives.
+
 \subsection{Controller}
 The Controller receives the DDS messages with the required informations (scheduling, weather information, measured sensor values and configuration messsages), and makes decision based on them. Figure \ref{fig:decision_logic} shows the exact process of decision making. Decision making runs periodically in each 5 minutes, and decision is also made on receiving every input messages. It's important to make decision independently to message receiving, because the last known informations can be outdated. In case of any information is outdated, the decision output must be \verb+CLOSED+ in order to avoid opened window under not safe circumstances.
 \begin{figure}[!htb]
