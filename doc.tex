@@ -18,6 +18,9 @@ basicstyle=\ttfamily,
 columns=flexible,
 breaklines=true
 }
+
+\usepackage{pdflscape}
+
 \usepackage{color}
 
 \definecolor{mygray}{rgb}{0.4,0.4,0.4}
@@ -159,13 +162,15 @@ In the first approach, we split the system into two disjoint part: the local and
 \item \textbf{Humidity Sensor}: The sensor goals is to periodically measure and publish the humidity value of the classroom.
 \item \textbf{LED Controller}: As its name says it has to turn on/off the LED according to the main controller's decision. It's logically separated from the main controller.
 \end{itemize}
-It has to be noticed that the local infrastructure is only a semantic architecture, so it has to mapped to physical device or devices. The four modules can be hosted on a single device or four separated devices. The figure TODOOO shows a possible mapping to physical devices:
+It has to be noticed that the local infrastructure is only a semantic architecture, so it has to mapped to physical device or devices. The four modules can be hosted on a single device or four separated devices. The figure \ref{fig:phisical_mapping} shows a possible mapping to physical devices:
 \begin{figure}[!htb]
 \centering
   \includegraphics[width=150px]{imgs/phisical_mapping.png}
   \caption{A possible mapping to physical devices}
   \label{fig:phisical_mapping}
 \end{figure}
+
+
 \section{Implementation}
 The implemented modules are the following:
 \begin{itemize}
@@ -298,12 +303,28 @@ public:
 \end{lstlisting}
 
 The \verb+on_data_available(dds::sub::DataReader<DataT> &reader)+ inherited from the base class, and shouldn't be called by the user. To start receiving messages the \verb+startReceiving(consumerFunction)+ function has to be called. After that, the subscriber will call the \verb+consumberFunction+ when a new message arrives.
-
+\subsubsection{Cloud infrastructure}
+The main part of the cloud infrastructure is the Azure IoT Hub. The advantage of Azure IoT Hub are the following:
+\begin{itemize}
+\item easy to use
+\item integrated to other Azure services
+\item well \href{https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-get-started}{documented} with a lot of examples
+\item there is a crossplatform C++ API
+\end{itemize}
+It also evolve so fast because of the huge amount of development done by Microsoft. Therefore it's useless to document this part of homework, because it will be outdated in a weeks. Problaly the above linked articles describe it more accurate and up-to-date. The stored data from Azure is transmitted to PowerBI to visualize the historical data. PowerBI was choosed because it's also integrated with Azure and it's easy to create visual reports thanks to the lot of preconfigurated diagrams. For example figure \ref{fig:powerbi_screenshot} shows the diagrams created from the histrical data.
+\begin{landscape}
+\begin{figure}[!htb]
+\centering
+  \includegraphics[width=\linewidth]{imgs/powerbi_screenshot.png}
+  \caption{Data visualized in PowerBI}
+  \label{fig:powerbi_screenshot}
+\end{figure}
+\end{landscape}
 \subsection{Controller}
 The Controller receives the DDS messages with the required informations (scheduling, weather information, measured sensor values and configuration messsages), and makes decision based on them. Figure \ref{fig:decision_logic} shows the exact process of decision making. Decision making runs periodically in each 5 minutes, and decision is also made on receiving every input messages. It's important to make decision independently to message receiving, because the last known informations can be outdated. In case of any information is outdated, the decision output must be \verb+CLOSED+ in order to avoid opened window under not safe circumstances.
 \begin{figure}[!htb]
 \centering
-  \includegraphics[width=250px]{imgs/decision_logic.png}
+  \includegraphics[width=170px]{imgs/decision_logic.png}
   \caption{Flow diagram of decision logic}
   \label{fig:decision_logic}
 \end{figure} 
