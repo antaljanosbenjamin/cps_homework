@@ -145,107 +145,39 @@ And the message is encrypted
 \item \textit{The subsystem must communicate with external systems by "best practice" protocols.}
 \item \textit{The subsystem must take into consideration the unavailability of external data sources when deciding on turning on/off the LED.}
 \end{itemize}
-\section{Prerequisites}
 
-To build the application on Linux Mint 18.3 the following steps are needed:
-
+\section{System architecture}
+\begin{figure}[!htb]
+  \includegraphics[width=\linewidth]{imgs/system_architecture.png}
+  \caption{The system semantic architecture}
+  \label{fig:system_architecture}
+\end{figure}
+In the first approach, we split the system into two disjoint part: the local and remote infrastructure. As the figure \ref{fig:system_architecture} shows, the local infrastructure contains the IoTEdge, controller and humidity sensor modules. They only communicate over DDS topics. The reason behind this is that in this way the infrastructure is easily can be expanded, because new modules also can subscribe to DDS topics and use the information sended over them. The local infrastructure contains four modules:
 \begin{itemize}
-\item Install required packages with apt: 
-\begin{itemize}
-\item \verb+libboost-all-dev+
-\item \verb+libcurl4-openssl-dev+
-\item \verb+libssl-dev+ %(some help can be found \href{https://unix.stackexchange.com/a/389170}{here})
-\item \verb+uuid-dev+
-\item \verb+rapidjson-dev+
-\item \verb+build-essential+
-\item \verb+cmake+
-\item \verb!g++!
-\item \verb+git+
+\item \textbf{IoTEdge}: The IoTEdge module is responsible for comunication with the remote infrastructure, which consists the cloud service and the weather forecast system. It also communicate with the Main Controller: edge send the weather, schedule and config information to it and receives the information that serves as the basis of decision making.
+\item \textbf{Main Controller}: The main controller receives the required information and sensor values and also make decisions based on the collected data. It also sends the decision input and output to the IoTEdge in order to store them in the cloud.
+\item \textbf{Humidity Sensor}: The sensor goals is to periodically measure and publish the humidity value of the classroom.
+\item \textbf{LED Controller}: As its name says it has to turn on/off the LED according to the main controller's decision. It's logically separated from the main controller.
 \end{itemize}
-Use the following command:
-\begin{lstlisting}
-$ sudo apt install libboost-all-dev libcurl4-openssl-dev libssl-dev uuid-dev rapidjson-dev build-essential cmake g++ git
-\end{lstlisting}
-\item Install \href{http://www.curlpp.org/}{cURLpp} with the steps described \href{https://github.com/beniz/deepdetect/issues/126}{here}:
-\begin{verbatim}
-$ sudo apt-get remove libcurlpp0
-$ mkdir curlppbuild
-$ cd curlppbuild
-$ git clone https://github.com/jpbarrette/curlpp.git
-$ cd curlpp
-$ cmake .
-$ sudo make install
-\end{verbatim} 
-\item Install AzureIoT C SDKfrom \href{https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md}{source}. After building the SDK use \verb+sudo make install+ to copy the header and the lib files to the system include path.
-\item Download and install \href{https://www.rti.com/gettingstarted/installlinux_secure}{RTI Connext DDS 5.3}
-\item Set the \verb+NDDSHOME+ environment variable to the root of RTI Connext DDS, e.g.: \verb+/opt/rti_connext_dds-5.3.0+
-\end{itemize}
-
-\section{Build}
-
-\section{Build}
-\begin{enumerate}
-\item Clone git repository
-\begin{lstlisting}
-$ git clone https://github.com/antaljanosbenjamin/cps_homework.git
-\end{lstlisting}
-\item Generate source code from .idl files
-\begin{lstlisting}[language=bash]
-$ cd cps_homework
-$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Config/common -replace idl_files/Config.idl
-$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Decision/common -replace idl_files/Decision.idl
-$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Schedule/common -replace idl_files/Schedule.idl
-$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Humidity/common -replace idl_files/UvegHaz.idl
-$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Weather/common -replace idl_files/Weather.idl
-\end{lstlisting}
-\item Build
-\begin{lstlisting}
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make [-j 8]
-\end{lstlisting}
-\end{enumerate}
-
-\section{Run demo}
-\begin{enumerate}
-\item Start humidity publisher
-\begin{verbatim}
-$ ./cps_main h <humidityDataFilePath>
-\end{verbatim}
-
-As result of this command the application will read the data file and start to publish a humidity value every 4 minutes. The file shall contains a humidity value per line. Each humidity value is a decimal number. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/humidity.txt}{file}.
-\item Start IoTEdge 
-\begin{lstlisting}
-$ ./cps_main e <weatherApiKey> <azureConnectionString> <scheduleFilePath>
-\end{lstlisting} 
-The meaning of parameteres are the following:
-\begin{itemize}
-\item \verb+weatherApiKey+: an API key for http://api.airvisual.com
-\item \verb+azureConnectionString+: the connection string of the device used Azure IoT Hub
-\item \verb+scheduleFilePath+: path to a CSV file which stores the schedules time intervals. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/schedule.csv}{file}.
-\end{itemize}
-
-The IoTEdge module is responsible for comunication with Azure IoT Hub, the weather information system and also to send schedule information through DDS topic.
-\item Start humidity controller
-\begin{verbatim}
-$ ./cps_main c
-\end{verbatim}
-
-The controller receives the required informations and sensor values and also make decisions based on the collected data. It also sends the decision input and output to the IoTEdge in order to store them in the cloud.
-\end{enumerate}
+It has to be noticed that the local infrastructure is only a semantic architecture, so it has to mapped to physical device or devices. The four modules can be hosted on a single device or four separated devices. The figure TODOOO shows a possible mapping to physical devices:
+\begin{figure}[!htb]
+\centering
+  \includegraphics[width=150px]{imgs/phisical_mapping.png}
+  \caption{A possible mapping to physical devices}
+  \label{fig:phisical_mapping}
+\end{figure}
 \section{Implementation}
-The system consists three modules:
+The implemented modules are the following:
 \begin{itemize}
 \item IoTEdge
 \item Controller
-\item Publisher
+\item Humidity Publisher
 \end{itemize}
-The publisher module exists only for testing purposes, so this documentation doesn't contains it's details.
+The publisher module exists only for mocking the real humidity sensor, so this documentation doesn't contains its details. There is no implementation of LED Controller, because this isn't in the focus of this homework.
 \subsection{IoTEdge}
 \begin{figure}[!htb]
   \includegraphics[width=\linewidth]{imgs/edge.png}
-  \caption{Architecture of IoT Edge}
+  \caption{Inner architecture of IoT Edge}
   \label{fig:arc_edge}
 \end{figure}
 
@@ -307,7 +239,7 @@ The most complex part of the IoTEdge module is the IoTHub Client. It is responsi
 
 The IoTHub Client is a reusable part of the implementation. It's public interface are really simple:
 
-\begin{lstlisting}[language=C++]{Name=test2}
+\begin{lstlisting}[language=C++]{Name=iothub_client}
 class IoTHubClient final {
 public:
 
@@ -331,7 +263,7 @@ The implementation is based on an official Azure IoT C SDK \href{https://github.
 \subsubsection{Abstract DDS classes}
 
 All of the \verb+XXXPublisher+ and the \verb+XXXSubscriber+ in this project is derived from \verb+AbstractPublisher+ and \verb+AbstractSubscriber+. They are generic template classes in order to make easy to create DDS publishers and subscribers. The interface of \verb+AbstractPublisher+ is the following:
-\begin{lstlisting}[language=C++]{Name=test2}
+\begin{lstlisting}[language=C++]{Name=publisher}
 template<typename DataT>
 class AbstractPublisher {
 public:
@@ -346,7 +278,7 @@ public:
 The \verb+DataT+ template parameter should be DDS generated message's type. The \verb+publishData(data)+ function can be used to send a message to the given topic.
 
 The \verb+AbstractSubscriber+'s interface is very similar:
-\begin{lstlisting}[language=C++]{Name=test2}
+\begin{lstlisting}[language=C++]{Name=subscriber}
 template<typename DataT>
 class AbstractSubscriber : public dds::sub::NoOpDataReaderListener<DataT> {
 public:
@@ -370,8 +302,95 @@ The \verb+on_data_available(dds::sub::DataReader<DataT> &reader)+ inherited from
 \subsection{Controller}
 The Controller receives the DDS messages with the required informations (scheduling, weather information, measured sensor values and configuration messsages), and makes decision based on them. Figure \ref{fig:decision_logic} shows the exact process of decision making. Decision making runs periodically in each 5 minutes, and decision is also made on receiving every input messages. It's important to make decision independently to message receiving, because the last known informations can be outdated. In case of any information is outdated, the decision output must be \verb+CLOSED+ in order to avoid opened window under not safe circumstances.
 \begin{figure}[!htb]
+\centering
   \includegraphics[width=250px]{imgs/decision_logic.png}
   \caption{Flow diagram of decision logic}
   \label{fig:decision_logic}
 \end{figure} 
+
+\section{Build tutorial}
+\subsection{Prerequisites}
+
+To build the application on Linux Mint 18.3 the following steps are needed:
+
+\begin{itemize}
+\item Install required packages with apt: 
+\begin{itemize}
+\item \verb+libboost-all-dev+
+\item \verb+libcurl4-openssl-dev+
+\item \verb+libssl-dev+ %(some help can be found \href{https://unix.stackexchange.com/a/389170}{here})
+\item \verb+uuid-dev+
+\item \verb+rapidjson-dev+
+\item \verb+build-essential+
+\item \verb+cmake+
+\item \verb!g++!
+\item \verb+git+
+\end{itemize}
+Use the following command:
+\begin{lstlisting}
+$ sudo apt install libboost-all-dev libcurl4-openssl-dev libssl-dev uuid-dev rapidjson-dev build-essential cmake g++ git
+\end{lstlisting}
+\item Install \href{http://www.curlpp.org/}{cURLpp} with the steps described \href{https://github.com/beniz/deepdetect/issues/126}{here}:
+\begin{verbatim}
+$ sudo apt-get remove libcurlpp0
+$ mkdir curlppbuild
+$ cd curlppbuild
+$ git clone https://github.com/jpbarrette/curlpp.git
+$ cd curlpp
+$ cmake .
+$ sudo make install
+\end{verbatim} 
+\item Install AzureIoT C SDKfrom \href{https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md}{source}. After building the SDK use \verb+sudo make install+ to copy the header and the lib files to the system include path.
+\item Download and install \href{https://www.rti.com/gettingstarted/installlinux_secure}{RTI Connext DDS 5.3}
+\item Set the \verb+NDDSHOME+ environment variable to the root of RTI Connext DDS, e.g.: \verb+/opt/rti_connext_dds-5.3.0+
+\end{itemize}
+\begin{enumerate}
+
+\subsection{Build process}
+\item Clone git repository
+\begin{lstlisting}
+$ git clone https://github.com/antaljanosbenjamin/cps_homework.git
+\end{lstlisting}
+\item Generate source code from .idl files
+\begin{lstlisting}[language=bash]
+$ cd cps_homework
+$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Config/common -replace idl_files/Config.idl
+$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Decision/common -replace idl_files/Decision.idl
+$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Schedule/common -replace idl_files/Schedule.idl
+$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Humidity/common -replace idl_files/UvegHaz.idl
+$ $NDDSHOME/bin/rtiddsgen  -language C++11 -stl -d DDS/Weather/common -replace idl_files/Weather.idl
+\end{lstlisting}
+\item Build
+\begin{lstlisting}
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make [-j 8]
+\end{lstlisting}
+\end{enumerate}
+
+\section{Run demo}
+\begin{enumerate}
+\item Start humidity publisher
+\begin{verbatim}
+$ ./cps_main h <humidityDataFilePath>
+\end{verbatim}
+
+As result of this command the application will read the data file and start to publish a humidity value every 4 minutes. The file shall contains a humidity value per line. Each humidity value is a decimal number. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/humidity.txt}{file}.
+\item Start IoTEdge 
+\begin{lstlisting}
+$ ./cps_main e <weatherApiKey> <azureConnectionString> <scheduleFilePath>
+\end{lstlisting} 
+The meaning of parameteres are the following:
+\begin{itemize}
+\item \verb+weatherApiKey+: an API key for http://api.airvisual.com
+\item \verb+azureConnectionString+: the connection string of the device used Azure IoT Hub
+\item \verb+scheduleFilePath+: path to a CSV file which stores the schedules time intervals. See example \href{https://github.com/antaljanosbenjamin/cps_homework/blob/master/examples/schedule.csv}{file}.
+\end{itemize}
+\item Start humidity controller
+\begin{verbatim}
+$ ./cps_main c
+\end{verbatim}
+\end{enumerate}
+
 \end{document}
